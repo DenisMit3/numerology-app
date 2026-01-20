@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, createContext, useContext } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     calculatePsychomatrix, calculateLifePathNumber, getLifePathMeaning, getLifePathDetailed,
@@ -17,10 +17,14 @@ import {
     calculatePowerNumber, calculateMaturityNumber, getTarotConnection
 } from '../utils/numerology';
 import {
-    RotateCcw, Sparkles, Grid3X3, TrendingUp, ChevronDown,
+    RotateCcw, Sparkles, Grid3X3, TrendingUp, ChevronDown, HelpCircle,
     User, Calendar, Gem, Zap, AlertCircle, Mountain, Heart, Lightbulb, Star, Clock, Gift,
     Flame, DollarSign, Target, Quote, Users, Sun, Moon, CalendarDays, Activity, Orbit
 } from 'lucide-react';
+
+// Context for beginner mode
+const BeginnerContext = createContext(false);
+const useIsBeginner = () => useContext(BeginnerContext);
 
 // ==================== PREMIUM COMPONENTS ====================
 
@@ -70,8 +74,11 @@ const BeginnerHint = ({ text }) => (
     </motion.div>
 );
 
-const Section = ({ icon: Icon, title, badge, children, defaultOpen = false, hint = null, isBeginner = false }) => {
+const Section = ({ icon: Icon, title, badge, children, defaultOpen = false, hint = null }) => {
     const [open, setOpen] = useState(defaultOpen);
+    const isBeginner = useIsBeginner();
+    const showHint = isBeginner && hint;
+
     return (
         <PremiumCard>
             <button onClick={() => setOpen(!open)} className="w-full flex items-center justify-between">
@@ -85,8 +92,8 @@ const Section = ({ icon: Icon, title, badge, children, defaultOpen = false, hint
                             {badge}
                         </span>
                     )}
-                    {isBeginner && hint && (
-                        <span className="text-[9px] text-blue-400 flex-shrink-0">💡</span>
+                    {showHint && (
+                        <HelpCircle size={14} className="text-blue-400 flex-shrink-0" />
                     )}
                 </div>
                 <motion.div animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.3 }} className="flex-shrink-0 ml-2">
@@ -102,7 +109,7 @@ const Section = ({ icon: Icon, title, badge, children, defaultOpen = false, hint
                         transition={{ duration: 0.3, ease: 'easeInOut' }}
                         className="overflow-hidden"
                     >
-                        {isBeginner && hint && <BeginnerHint text={hint} />}
+                        {showHint && <BeginnerHint text={hint} />}
                         <div className="mt-3 sm:mt-4 space-y-2.5 sm:space-y-3">{children}</div>
                     </motion.div>
                 )}
@@ -216,7 +223,7 @@ const BirthdaySection = ({ birthDate }) => {
     const num = calculateBirthdayNumber(birthDate);
     const meaning = getBirthdayNumberMeaning(num);
     return (
-        <Section icon={Gift} title="Число Дня Рождения">
+        <Section icon={Gift} title="Число Дня Рождения" hint="Число дня рождения — это одна цифра вашего дня рождения (или сумма, если двузначная). Оно показывает ваши природные таланты и способности.">
             <div className="flex items-center gap-4 p-4 rounded-2xl bg-gradient-to-br from-orange-500/10 to-amber-500/10 border border-orange-500/20">
                 <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center shadow-lg shadow-orange-500/30">
                     <span className="text-3xl font-bold text-white">{num}</span>
@@ -246,7 +253,7 @@ const PersonalCyclesSection = ({ birthDate }) => {
     ];
 
     return (
-        <Section icon={Zap} title="Энергия Сейчас" badge="LIVE">
+        <Section icon={Zap} title="Энергия Сейчас" badge="LIVE" hint={BEGINNER_HINTS.horoscope}>
             {cycles.map((c, i) => (
                 <motion.div
                     key={i}
@@ -284,7 +291,7 @@ const NameSection = ({ name }) => {
         { type: 'personality', label: 'Личность', num: calculatePersonalityNumber(name), gradient: 'from-cyan-500 to-blue-500' }
     ];
     return (
-        <Section icon={User} title="Нумерология Имени">
+        <Section icon={User} title="Нумерология Имени" hint="Каждая буква имени имеет числовое значение. Из имени рассчитываются Число Выражения (таланты), Число Души (желания) и Число Личности (внешний образ).">
             <div className="grid grid-cols-3 gap-2">
                 {data.map(d => {
                     const m = getNameNumberMeaning(d.type, d.num);
@@ -313,7 +320,7 @@ const PinnaclesSection = ({ birthDate }) => {
     const colors = ['#f43f5e', '#14b8a6', '#f59e0b', '#8b5cf6'];
 
     return (
-        <Section icon={Mountain} title="Пики Жизни">
+        <Section icon={Mountain} title="Пики Жизни" hint={BEGINNER_HINTS.pinnacles}>
             <div className="relative">
                 {/* Timeline line */}
                 <div className="absolute left-5 top-0 bottom-0 w-0.5 bg-gradient-to-b from-rose-500 via-teal-500 via-amber-500 to-purple-500 rounded-full" />
@@ -359,7 +366,7 @@ const TransitionSection = ({ birthDate }) => {
     const currentAge = new Date().getFullYear() - year;
 
     return (
-        <Section icon={Clock} title="Ключевые Возрасты">
+        <Section icon={Clock} title="Ключевые Возрасты" hint="Ключевые возрасты — это переломные моменты в жизни, когда происходят важные перемены. Они рассчитываются индивидуально по вашей дате рождения.">
             <div className="flex gap-2 overflow-x-auto pb-2">
                 {ages.map((item, i) => {
                     const isCurrent = Math.abs(currentAge - item.age) <= 3;
@@ -397,7 +404,7 @@ const LinesSection = ({ matrix }) => {
     ];
 
     return (
-        <Section icon={TrendingUp} title="Линии Судьбы">
+        <Section icon={TrendingUp} title="Линии Судьбы" hint={BEGINNER_HINTS.lines}>
             <div className="space-y-2.5">
                 {all.map(({ key, value }, i) => {
                     const m = getLineMeaning(key, value);
@@ -441,7 +448,7 @@ const DestinyGraphSection = ({ dateString }) => {
     if (!points.length) return null;
 
     return (
-        <Section icon={TrendingUp} title="График Судьбы">
+        <Section icon={TrendingUp} title="График Судьбы" hint={BEGINNER_HINTS.destiny}>
             <div className="h-36 rounded-2xl bg-black/40 p-4 relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-t from-purple-500/10 to-transparent" />
                 <svg className="w-full h-full relative z-10" viewBox="0 0 280 100" preserveAspectRatio="none">
@@ -497,7 +504,7 @@ const DestinyGraphSection = ({ dateString }) => {
 const KarmicSection = ({ matrix }) => {
     const lessons = calculateKarmicLessons(matrix);
     if (!lessons.length) return (
-        <Section icon={AlertCircle} title="Кармические Уроки">
+        <Section icon={AlertCircle} title="Кармические Уроки" hint={BEGINNER_HINTS.karmic}>
             <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-500/20 to-teal-500/10 border border-emerald-500/30">
                 <p className="text-[12px] text-emerald-300 font-medium">✓ Все числа присутствуют — карма сбалансирована</p>
             </div>
@@ -505,7 +512,7 @@ const KarmicSection = ({ matrix }) => {
     );
 
     return (
-        <Section icon={AlertCircle} title="Кармические Уроки">
+        <Section icon={AlertCircle} title="Кармические Уроки" hint={BEGINNER_HINTS.karmic}>
             {lessons.slice(0, 3).map((num, i) => {
                 const m = getKarmicLessonMeaning(num);
                 return (
@@ -667,7 +674,7 @@ const ChallengesSection = ({ birthDate }) => {
     const colors = ['#ef4444', '#f97316', '#eab308', '#22c55e'];
 
     return (
-        <Section icon={Target} title="Числа Испытания">
+        <Section icon={Target} title="Числа Испытания" hint={BEGINNER_HINTS.challenges}>
             <p className="text-[10px] text-white/40 mb-3">Уроки, которые предстоит пройти в разные периоды жизни</p>
             <div className="space-y-2">
                 {challenges.map((ch, i) => {
@@ -889,7 +896,7 @@ const CompatibilitySection = ({ birthDate, onCalculate }) => {
     };
 
     return (
-        <Section icon={Users} title="Совместимость">
+        <Section icon={Users} title="Совместимость" hint={BEGINNER_HINTS.compatibility}>
             <div className="space-y-4">
                 <div className="flex gap-2">
                     <input
@@ -961,7 +968,7 @@ const DailyHoroscopeSection = ({ birthDate }) => {
     const horoscope = getDailyHoroscope(birthDate);
 
     return (
-        <Section icon={Sun} title="Прогноз на Сегодня" badge="LIVE" defaultOpen={true}>
+        <Section icon={Sun} title="Прогноз на Сегодня" badge="LIVE" defaultOpen={true} hint={BEGINNER_HINTS.horoscope}>
             <div className="space-y-3">
                 <div className="flex items-center justify-between p-4 rounded-2xl bg-gradient-to-r from-amber-500/20 to-orange-500/10 border border-amber-500/30">
                     <div>
@@ -1188,7 +1195,7 @@ const BiorhythmSection = ({ birthDate }) => {
     ];
 
     return (
-        <Section icon={Activity} title="Биоритмы на сегодня" badge="LIVE">
+        <Section icon={Activity} title="Биоритмы на сегодня" badge="LIVE" hint={BEGINNER_HINTS.biorhythm}>
             <div className="space-y-4">
                 {cycles.map((cycle, i) => (
                     <div key={i} className="space-y-1.5">
@@ -1269,7 +1276,7 @@ const PlanetarySection = ({ lifePath }) => {
     const planet = getPlanetaryAssociation(lifePath);
 
     return (
-        <Section icon={Orbit} title="Планетарное влияние">
+        <Section icon={Orbit} title="Планетарное влияние" hint={BEGINNER_HINTS.planetary}>
             <div className="text-center py-2">
                 <div className="text-5xl mb-3">{planet.symbol}</div>
                 <h3 className="text-xl font-bold text-white">{planet.planet}</h3>
@@ -1299,7 +1306,7 @@ const TarotSection = ({ lifePath }) => {
     const tarot = getTarotConnection(lifePath);
 
     return (
-        <Section icon={Star} title="Связь с Таро">
+        <Section icon={Star} title="Связь с Таро" hint={BEGINNER_HINTS.tarot}>
             <div className="flex items-center gap-4">
                 <div className="w-16 h-24 rounded-xl bg-gradient-to-br from-purple-600 to-indigo-800 flex items-center justify-center border border-purple-400/30 shadow-lg shadow-purple-500/20">
                     <span className="text-2xl font-bold text-white">{tarot.arcana}</span>
@@ -1419,7 +1426,7 @@ const ResultDashboard = ({ data, onReset }) => {
     const details = getLifePathDetailed(lifePath);
     const isBeginner = data.isBeginner ?? false;
 
-    return (
+    const content = (
         <div className="w-full h-full overflow-y-auto overflow-x-hidden px-4 sm:px-5 pb-12 pt-4 space-y-4">
 
             {/* Beginner Welcome */}
@@ -1571,7 +1578,13 @@ const ResultDashboard = ({ data, onReset }) => {
             </AnimatePresence>
         </div>
     );
+
+    // Wrap everything in BeginnerContext
+    return (
+        <BeginnerContext.Provider value={isBeginner}>
+            {content}
+        </BeginnerContext.Provider>
+    );
 };
 
 export default ResultDashboard;
-
