@@ -37,7 +37,7 @@ const PremiumCard = ({ children, className = '', gradient = false }) => (
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        className={`relative overflow-hidden rounded-3xl p-4 
+        className={`relative overflow-hidden rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 
       bg-gradient-to-br from-white/[0.08] to-white/[0.02]
       backdrop-blur-xl border border-white/10
       shadow-[0_8px_32px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.1)]
@@ -54,18 +54,18 @@ const Section = ({ icon: Icon, title, badge, children, defaultOpen = false }) =>
     return (
         <PremiumCard>
             <button onClick={() => setOpen(!open)} className="w-full flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-purple-500/30 to-pink-500/20 flex items-center justify-center border border-purple-500/20">
-                        <Icon size={16} className="text-purple-300" />
+                <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                    <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl sm:rounded-2xl bg-gradient-to-br from-purple-500/30 to-pink-500/20 flex items-center justify-center border border-purple-500/20 flex-shrink-0">
+                        <Icon size={14} className="text-purple-300 sm:w-4 sm:h-4" />
                     </div>
-                    <span className="text-[14px] font-semibold text-white">{title}</span>
+                    <span className="text-[13px] sm:text-[14px] font-semibold text-white truncate">{title}</span>
                     {badge && (
-                        <span className="px-2 py-0.5 text-[9px] font-semibold bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 text-emerald-300 rounded-full border border-emerald-500/30 animate-pulse">
+                        <span className="px-1.5 sm:px-2 py-0.5 text-[8px] sm:text-[9px] font-semibold bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 text-emerald-300 rounded-full border border-emerald-500/30 animate-pulse flex-shrink-0">
                             {badge}
                         </span>
                     )}
                 </div>
-                <motion.div animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.3 }}>
+                <motion.div animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.3 }} className="flex-shrink-0 ml-2">
                     <ChevronDown size={18} className="text-white/40" />
                 </motion.div>
             </button>
@@ -78,7 +78,7 @@ const Section = ({ icon: Icon, title, badge, children, defaultOpen = false }) =>
                         transition={{ duration: 0.3, ease: 'easeInOut' }}
                         className="overflow-hidden"
                     >
-                        <div className="mt-4 space-y-3">{children}</div>
+                        <div className="mt-3 sm:mt-4 space-y-2.5 sm:space-y-3">{children}</div>
                     </motion.div>
                 )}
             </AnimatePresence>
@@ -1132,40 +1132,50 @@ const LuckyDatesSection = ({ birthDate }) => {
 const CellModal = ({ num, count, onClose }) => {
     const m = getCellDetailedMeaning(num, count);
     if (!m) return null;
+
+    const handleClose = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onClose();
+    };
+
     return (
         <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/90 backdrop-blur-xl z-50 flex items-center justify-center p-6"
-            onClick={onClose}
+            className="fixed inset-0 bg-black/90 backdrop-blur-xl z-[100] flex items-center justify-center p-4 sm:p-6"
+            onClick={handleClose}
         >
             <motion.div
                 initial={{ scale: 0.8, y: 40 }}
                 animate={{ scale: 1, y: 0 }}
                 exit={{ scale: 0.8, y: 40 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-                className="w-full max-w-sm"
+                className="w-full max-w-sm mx-4"
                 onClick={e => e.stopPropagation()}
             >
-                <PremiumCard gradient>
+                <div className="relative overflow-hidden rounded-3xl p-5 bg-gradient-to-br from-white/[0.12] to-white/[0.04] backdrop-blur-xl border border-white/20 shadow-2xl">
+                    <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/50 to-transparent" />
                     <div className="flex items-center gap-4 mb-5">
-                        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-xl shadow-purple-500/30">
-                            <span className="text-2xl font-bold text-white">{count > 0 ? num.toString().repeat(Math.min(count, 2)) : '—'}</span>
+                        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-xl shadow-purple-500/30 flex-shrink-0">
+                            <span className="text-xl sm:text-2xl font-bold text-white">{count > 0 ? num.toString().repeat(Math.min(count, 2)) : '—'}</span>
                         </div>
-                        <div>
-                            <h3 className="text-xl font-bold text-white">{m.label}</h3>
+                        <div className="min-w-0">
+                            <h3 className="text-lg sm:text-xl font-bold text-white truncate">{m.label}</h3>
                             <p className="text-purple-300 text-sm font-medium">{m.title}</p>
                         </div>
                     </div>
-                    <p className="text-[13px] text-white/70 leading-relaxed mb-5">{m.text}</p>
-                    <button
-                        onClick={onClose}
-                        className="w-full py-3 rounded-2xl bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm font-semibold hover:shadow-lg hover:shadow-purple-500/30 transition-all"
+                    <p className="text-[13px] sm:text-[14px] text-white/80 leading-relaxed mb-5">{m.text}</p>
+                    <motion.button
+                        whileTap={{ scale: 0.95 }}
+                        onClick={handleClose}
+                        type="button"
+                        className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm font-semibold shadow-lg shadow-purple-500/30 active:scale-95 transition-transform"
                     >
                         Понятно
-                    </button>
-                </PremiumCard>
+                    </motion.button>
+                </div>
             </motion.div>
         </motion.div>
     );
@@ -1182,23 +1192,23 @@ const ResultDashboard = ({ data, onReset }) => {
     const details = getLifePathDetailed(lifePath);
 
     return (
-        <div className="w-full h-full overflow-y-auto px-3 pb-10 space-y-4">
+        <div className="w-full h-full overflow-y-auto overflow-x-hidden px-4 sm:px-5 pb-12 pt-4 space-y-4">
 
             {/* Header */}
-            <header className="text-center py-5">
+            <header className="text-center py-4 sm:py-5">
                 <motion.div
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-3"
+                    className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-3"
                 >
                     <Sparkles className="text-purple-400" size={14} />
-                    <span className="text-[11px] uppercase tracking-widest text-white/50 font-medium">Анализ завершён</span>
+                    <span className="text-[10px] sm:text-[11px] uppercase tracking-widest text-white/50 font-medium">Анализ завершён</span>
                 </motion.div>
                 <motion.h1
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
-                    className="text-3xl font-display font-bold bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent"
+                    className="text-2xl sm:text-3xl font-display font-bold bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent px-4"
                 >
                     {data.name}
                 </motion.h1>
