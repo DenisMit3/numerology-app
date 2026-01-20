@@ -898,7 +898,7 @@ const CompatibilitySection = ({ birthDate, onCalculate }) => {
     return (
         <Section icon={Users} title="Совместимость" hint={BEGINNER_HINTS.compatibility}>
             <div className="space-y-4">
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                     <input
                         type="text"
                         value={partnerDate}
@@ -909,9 +909,9 @@ const CompatibilitySection = ({ birthDate, onCalculate }) => {
                     <motion.button
                         whileTap={{ scale: 0.95 }}
                         onClick={handleCalculate}
-                        className="px-4 py-3 rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 text-white text-[12px] font-semibold"
+                        className="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 text-white text-[13px] font-semibold shadow-lg shadow-pink-500/20"
                     >
-                        Рассчитать
+                        💕 Рассчитать
                     </motion.button>
                 </div>
 
