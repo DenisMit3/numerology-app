@@ -32,11 +32,16 @@ const GlowNumber = ({ number, size = 'lg', color = 'purple' }) => (
     </div>
 );
 
-const PremiumCard = ({ children, className = '', gradient = false }) => (
+const PremiumCard = ({ children, className = '', gradient = false, index = 0 }) => (
     <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        transition={{
+            type: 'spring',
+            stiffness: 300,
+            damping: 30,
+            delay: index * 0.05 // Stagger effect
+        }}
         className={`relative overflow-hidden rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 
       bg-gradient-to-br from-white/[0.08] to-white/[0.02]
       backdrop-blur-xl border border-white/10

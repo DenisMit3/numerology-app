@@ -1,6 +1,13 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Sparkles, Zap } from 'lucide-react';
+import { Send, Sparkles, Zap, History, ChevronRight } from 'lucide-react';
+
+// Haptic feedback
+const vibrate = (pattern = 10) => {
+    if (navigator.vibrate) {
+        navigator.vibrate(pattern);
+    }
+};
 
 // Typing effect component
 const TypingText = ({ text, speed = 15, onComplete }) => {
@@ -56,6 +63,40 @@ const parseDate = (text) => {
     return null;
 };
 
+// Get saved history
+const HISTORY_KEY = 'numerology_history';
+const getHistory = () => {
+    try {
+        return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+    } catch {
+        return [];
+    }
+};
+
+const saveToHistory = (data) => {
+    try {
+        const history = getHistory();
+        const exists = history.findIndex(h => h.name === data.name && h.birthDate === data.birthDate);
+        if (exists >= 0) {
+            history.splice(exists, 1);
+        }
+        history.unshift({ ...data, timestamp: Date.now() });
+        localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, 10)));
+    } catch {
+        console.log('Could not save to history');
+    }
+};
+
+// Personalized greetings based on time
+const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 6) return "Не спится? 🌙 Самое время узнать свою судьбу";
+    if (hour < 12) return "Доброе утро! ☀️ Готовы узнать свой код судьбы?";
+    if (hour < 18) return "Добрый день! ✨ Давайте раскроем тайны чисел";
+    if (hour < 22) return "Добрый вечер! 🌟 Загляните в мистерию цифр";
+    return "Доброй ночи! 🌙 Числа никогда не спят";
+};
+
 const ChatInterface = ({ onComplete }) => {
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState('');
@@ -63,6 +104,8 @@ const ChatInterface = ({ onComplete }) => {
     const [userData, setUserData] = useState({ name: '', birthDate: '' });
     const [isTyping, setIsTyping] = useState(false);
     const [dateError, setDateError] = useState('');
+    const [showHistory, setShowHistory] = useState(false);
+    const [history, setHistory] = useState([]);
     const scrollRef = useRef(null);
     const initRef = useRef(false);
 
@@ -71,13 +114,18 @@ const ChatInterface = ({ onComplete }) => {
     }, [messages]);
 
     useEffect(() => {
+        setHistory(getHistory());
+    }, []);
+
+    useEffect(() => {
         if (initRef.current) return;
         initRef.current = true;
 
+        const greeting = getGreeting();
         const introMessages = [
-            { text: "✨ Добро пожаловать в Архитектуру Судьбы", delay: 400 },
-            { text: "Я — ваш персональный нумеролог на базе ИИ. Проведу глубокий анализ вашей Психоматрицы по системе Пифагора.", delay: 2500 },
-            { text: "Как я могу к вам обращаться?", delay: 4800 }
+            { text: greeting, delay: 400 },
+            { text: "Я — Нумеролог AI. Проведу глубокий анализ вашей личности по системе Пифагора. Это займёт всего минуту! ⚡", delay: 2500 },
+            { text: "Как я могу к вам обращаться?", delay: 5000 }
         ];
 
         introMessages.forEach((msg, i) => {
@@ -90,6 +138,7 @@ const ChatInterface = ({ onComplete }) => {
 
     const addAiMessage = useCallback((text, callback) => {
         setIsTyping(true);
+        vibrate(5);
         setTimeout(() => {
             setMessages(prev => [...prev, { id: `ai-${Date.now()}`, sender: 'ai', text, typing: true }]);
             setIsTyping(false);
@@ -100,6 +149,7 @@ const ChatInterface = ({ onComplete }) => {
     const handleSend = () => {
         if (!input.trim() || isTyping) return;
         const value = input.trim();
+        vibrate(10);
 
         if (step === 'name') {
             setMessages(prev => [...prev, { id: `user-${Date.now()}`, sender: 'user', text: value }]);
@@ -107,14 +157,24 @@ const ChatInterface = ({ onComplete }) => {
             setStep('waiting');
             setUserData(prev => ({ ...prev, name: value }));
 
-            addAiMessage(`Приятно познакомиться, ${value}! 🌟`, () => {
-                addAiMessage("Теперь укажите дату рождения в формате ДД.ММ.ГГГГ — это ключ к вашей Психоматрице.", () => {
+            // Personalized responses based on name
+            const reactions = [
+                `${value} — красивое имя! 🌟`,
+                `Рада познакомиться, ${value}! ✨`,
+                `${value}, отличное имя! Давайте посмотрим ваши числа 🔮`,
+                `Приятно познакомиться, ${value}! 💫`
+            ];
+            const reaction = reactions[Math.floor(Math.random() * reactions.length)];
+
+            addAiMessage(reaction, () => {
+                addAiMessage("Теперь укажите дату рождения — это ключ к вашей Психоматрице. Формат: ДД.ММ.ГГГГ", () => {
                     setStep('date');
                 });
             });
         } else if (step === 'date') {
             const parsedDate = parseDate(value);
             if (!parsedDate) {
+                vibrate([20, 50, 20]);
                 setDateError('Формат: ДД.ММ.ГГГГ (например 15.03.1990)');
                 setTimeout(() => setDateError(''), 3000);
                 return;
@@ -126,11 +186,30 @@ const ChatInterface = ({ onComplete }) => {
             setDateError('');
 
             const finalUserData = { ...userData, birthDate: parsedDate };
-            addAiMessage("Запускаю квантовый анализ... 🔮", () => {
+
+            // Save to history
+            saveToHistory(finalUserData);
+
+            // Fun loading messages
+            const loadingPhrases = [
+                "Вижу интересный паттерн... 🔮",
+                "Соединяю числа судьбы... ✨",
+                "Расшифровываю ваш космический код... 💫"
+            ];
+            const loadingPhrase = loadingPhrases[Math.floor(Math.random() * loadingPhrases.length)];
+
+            addAiMessage(loadingPhrase, () => {
                 setMessages(prev => [...prev, { id: `calc`, sender: 'ai', calculating: true }]);
-                setTimeout(() => onComplete(finalUserData), 3000);
+                vibrate([30, 100, 30, 100, 50]);
+                setTimeout(() => onComplete(finalUserData), 3500);
             });
         }
+    };
+
+    const handleHistorySelect = (item) => {
+        vibrate(15);
+        setShowHistory(false);
+        onComplete(item);
     };
 
     const showInput = step === 'name' || step === 'date';
@@ -172,8 +251,50 @@ const ChatInterface = ({ onComplete }) => {
                         ) : 'онлайн'}
                     </p>
                 </div>
+
+                {/* History button */}
+                {history.length > 0 && step !== 'calculating' && (
+                    <motion.button
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => { setShowHistory(!showHistory); vibrate(5); }}
+                        className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10"
+                    >
+                        <History size={16} className="text-white/50" />
+                    </motion.button>
+                )}
+
                 <Zap size={16} className="text-yellow-400" />
             </div>
+
+            {/* History dropdown */}
+            <AnimatePresence>
+                {showHistory && (
+                    <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="border-b border-white/5 overflow-hidden"
+                    >
+                        <div className="p-3 space-y-2">
+                            <p className="text-[10px] uppercase tracking-wider text-white/30 px-2">Недавние анализы</p>
+                            {history.slice(0, 5).map((item, i) => (
+                                <motion.button
+                                    key={i}
+                                    whileTap={{ scale: 0.98 }}
+                                    onClick={() => handleHistorySelect(item)}
+                                    className="w-full flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors"
+                                >
+                                    <div className="text-left">
+                                        <p className="text-[13px] text-white font-medium">{item.name}</p>
+                                        <p className="text-[11px] text-white/40">{item.birthDate.split('-').reverse().join('.')}</p>
+                                    </div>
+                                    <ChevronRight size={16} className="text-white/30" />
+                                </motion.button>
+                            ))}
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
@@ -209,13 +330,23 @@ const ChatInterface = ({ onComplete }) => {
                                             <p className="text-[10px] text-white/40">Построение графа судьбы</p>
                                         </div>
                                     </div>
+
+                                    {/* Progress bar */}
+                                    <div className="mt-4 h-1 bg-white/10 rounded-full overflow-hidden">
+                                        <motion.div
+                                            initial={{ width: '0%' }}
+                                            animate={{ width: '100%' }}
+                                            transition={{ duration: 3, ease: 'easeInOut' }}
+                                            className="h-full bg-gradient-to-r from-purple-500 to-pink-500"
+                                        />
+                                    </div>
                                 </div>
                             ) : (
                                 <motion.div
                                     whileHover={{ scale: 1.01 }}
                                     className={`max-w-[85%] px-4 py-3 ${msg.sender === 'user'
-                                            ? 'bg-gradient-to-br from-purple-600 to-pink-600 text-white rounded-2xl rounded-br-md shadow-lg shadow-purple-500/20'
-                                            : 'glass-card text-white/90 rounded-2xl rounded-bl-md'
+                                        ? 'bg-gradient-to-br from-purple-600 to-pink-600 text-white rounded-2xl rounded-br-md shadow-lg shadow-purple-500/20'
+                                        : 'glass-card text-white/90 rounded-2xl rounded-bl-md'
                                         }`}
                                 >
                                     <p className="text-[13px] leading-relaxed">
@@ -249,7 +380,9 @@ const ChatInterface = ({ onComplete }) => {
                                 placeholder={step === 'name' ? 'Ваше имя...' : 'ДД.ММ.ГГГГ'}
                                 disabled={isTyping}
                                 autoFocus
-                                className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 text-white text-[14px] placeholder-white/30 focus:outline-none focus:border-purple-500/50 focus:bg-white/10 transition-all disabled:opacity-50 pr-12"
+                                autoComplete="off"
+                                autoCapitalize="words"
+                                className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 text-white text-[14px] placeholder-white/30 focus:outline-none focus:border-purple-500/50 focus:bg-white/10 transition-all disabled:opacity-50"
                             />
                         </div>
                         <motion.button
@@ -262,6 +395,25 @@ const ChatInterface = ({ onComplete }) => {
                             <Send size={18} />
                         </motion.button>
                     </div>
+
+                    {/* Quick date buttons */}
+                    {step === 'date' && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="flex gap-2 mt-3 justify-center flex-wrap"
+                        >
+                            {['01.01.1990', '15.06.1985', '25.12.2000'].map(date => (
+                                <button
+                                    key={date}
+                                    onClick={() => setInput(date)}
+                                    className="px-3 py-1.5 text-[11px] text-white/40 bg-white/5 rounded-lg hover:bg-white/10 transition-colors"
+                                >
+                                    {date}
+                                </button>
+                            ))}
+                        </motion.div>
+                    )}
                 </div>
             )}
         </div>
