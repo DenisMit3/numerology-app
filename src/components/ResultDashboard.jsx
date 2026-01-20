@@ -12,12 +12,14 @@ import {
     calculateHiddenPassions, getHiddenPassionMeaning,
     getDailyAffirmation, getLoveAdvice, getFinancialProfile, getSoulMission,
     calculateFullCompatibility, getYearForecast, calculateLuckyDates,
-    getDailyHoroscope, getMonthlyHoroscope
+    getDailyHoroscope, getMonthlyHoroscope,
+    calculateBiorhythms, calculateKarmicDebt, getPlanetaryAssociation,
+    calculatePowerNumber, calculateMaturityNumber, getTarotConnection
 } from '../utils/numerology';
 import {
     RotateCcw, Sparkles, Grid3X3, TrendingUp, ChevronDown,
     User, Calendar, Gem, Zap, AlertCircle, Mountain, Heart, Lightbulb, Star, Clock, Gift,
-    Flame, DollarSign, Target, Quote, Users, Sun, Moon, CalendarDays
+    Flame, DollarSign, Target, Quote, Users, Sun, Moon, CalendarDays, Activity, Orbit
 } from 'lucide-react';
 
 // ==================== PREMIUM COMPONENTS ====================
@@ -1132,6 +1134,191 @@ const LuckyDatesSection = ({ birthDate }) => {
     );
 };
 
+// ==================== BIORHYTHMS SECTION ====================
+
+const BiorhythmSection = ({ birthDate }) => {
+    const bio = calculateBiorhythms(birthDate);
+
+    const getBarColor = (value) => {
+        if (value > 50) return 'from-emerald-500 to-green-400';
+        if (value > 0) return 'from-yellow-500 to-amber-400';
+        if (value > -50) return 'from-orange-500 to-red-400';
+        return 'from-red-600 to-red-500';
+    };
+
+    const cycles = [
+        { name: 'Физический', value: bio.physical, icon: '💪', color: 'red' },
+        { name: 'Эмоциональный', value: bio.emotional, icon: '💚', color: 'green' },
+        { name: 'Интеллектуальный', value: bio.intellectual, icon: '🧠', color: 'blue' }
+    ];
+
+    return (
+        <Section icon={Activity} title="Биоритмы на сегодня" badge="LIVE">
+            <div className="space-y-4">
+                {cycles.map((cycle, i) => (
+                    <div key={i} className="space-y-1.5">
+                        <div className="flex justify-between items-center">
+                            <span className="text-[12px] text-white/70">{cycle.icon} {cycle.name}</span>
+                            <span className={`text-[13px] font-bold ${cycle.value > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                {cycle.value > 0 ? '+' : ''}{cycle.value}%
+                            </span>
+                        </div>
+                        <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                            <motion.div
+                                initial={{ width: 0 }}
+                                animate={{ width: `${Math.abs(cycle.value)}%` }}
+                                transition={{ duration: 1, delay: i * 0.1 }}
+                                className={`h-full rounded-full bg-gradient-to-r ${getBarColor(cycle.value)}`}
+                            />
+                        </div>
+                    </div>
+                ))}
+
+                <div className="pt-3 border-t border-white/10">
+                    <p className="text-[11px] text-white/50 mb-2">📌 Рекомендации:</p>
+                    {bio.advice.map((adv, i) => (
+                        <p key={i} className="text-[12px] text-white/70">• {adv}</p>
+                    ))}
+                </div>
+            </div>
+        </Section>
+    );
+};
+
+// ==================== KARMIC DEBT SECTION ====================
+
+const KarmicDebtSection = ({ birthDate, name }) => {
+    const debts = calculateKarmicDebt(birthDate, name);
+
+    if (debts.length === 0) {
+        return (
+            <Section icon={AlertCircle} title="Кармические долги">
+                <div className="text-center py-4">
+                    <span className="text-3xl">✨</span>
+                    <p className="text-[13px] text-white/70 mt-2">У вас нет кармических долгов!</p>
+                    <p className="text-[11px] text-white/40 mt-1">Это редкий и благоприятный знак</p>
+                </div>
+            </Section>
+        );
+    }
+
+    return (
+        <Section icon={AlertCircle} title="Кармические долги">
+            <div className="space-y-4">
+                {debts.map((debt, i) => (
+                    <div key={i} className="p-3 rounded-xl bg-gradient-to-r from-red-500/10 to-orange-500/10 border border-red-500/20">
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center text-white font-bold">
+                                {debt.number}
+                            </div>
+                            <div>
+                                <p className="text-[13px] font-semibold text-white">{debt.name}</p>
+                                <p className="text-[10px] text-white/40">{debt.source}</p>
+                            </div>
+                        </div>
+                        <div className="space-y-1.5 text-[11px]">
+                            <p className="text-white/60"><span className="text-red-400">Карма:</span> {debt.karma}</p>
+                            <p className="text-white/60"><span className="text-yellow-400">Урок:</span> {debt.lesson}</p>
+                            <p className="text-white/60"><span className="text-emerald-400">Совет:</span> {debt.advice}</p>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </Section>
+    );
+};
+
+// ==================== PLANETARY SECTION ====================
+
+const PlanetarySection = ({ lifePath }) => {
+    const planet = getPlanetaryAssociation(lifePath);
+
+    return (
+        <Section icon={Orbit} title="Планетарное влияние">
+            <div className="text-center py-2">
+                <div className="text-5xl mb-3">{planet.symbol}</div>
+                <h3 className="text-xl font-bold text-white">{planet.planet}</h3>
+                <p className="text-[12px] text-white/50 mt-1">{planet.energy}</p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 mt-4">
+                <InfoCard label="День силы" value={planet.day} />
+                <InfoCard label="Цвета" value={planet.color} />
+                <InfoCard label="Металл" value={planet.metal} />
+                <InfoCard label="Камни" value={planet.gem} />
+            </div>
+        </Section>
+    );
+};
+
+const InfoCard = ({ label, value }) => (
+    <div className="p-2.5 rounded-xl bg-white/5 border border-white/10">
+        <p className="text-[9px] text-white/40 uppercase tracking-wider">{label}</p>
+        <p className="text-[12px] text-white/80 mt-0.5">{value}</p>
+    </div>
+);
+
+// ==================== TAROT SECTION ====================
+
+const TarotSection = ({ lifePath }) => {
+    const tarot = getTarotConnection(lifePath);
+
+    return (
+        <Section icon={Star} title="Связь с Таро">
+            <div className="flex items-center gap-4">
+                <div className="w-16 h-24 rounded-xl bg-gradient-to-br from-purple-600 to-indigo-800 flex items-center justify-center border border-purple-400/30 shadow-lg shadow-purple-500/20">
+                    <span className="text-2xl font-bold text-white">{tarot.arcana}</span>
+                </div>
+                <div className="flex-1">
+                    <h3 className="text-lg font-bold text-white">{tarot.card}</h3>
+                    <p className="text-[12px] text-purple-300 mt-1">Аркан {tarot.arcana}</p>
+                    <p className="text-[11px] text-white/60 mt-2">{tarot.meaning}</p>
+                </div>
+            </div>
+            <p className="text-[10px] text-white/40 mt-3 italic">
+                Эта карта отражает основную энергию вашего Жизненного Пути
+            </p>
+        </Section>
+    );
+};
+
+// ==================== POWER NUMBER SECTION ====================
+
+const PowerNumberSection = ({ lifePath, name }) => {
+    const expression = calculateExpressionNumber(name);
+    const power = calculatePowerNumber(lifePath, expression);
+    const maturity = calculateMaturityNumber(lifePath, expression);
+
+    return (
+        <Section icon={Zap} title="Числа Силы и Зрелости">
+            <div className="space-y-4">
+                {/* Power Number */}
+                <div className="flex items-center gap-4 p-3 rounded-xl bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/20">
+                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-yellow-500 to-orange-500 flex items-center justify-center shadow-lg">
+                        <span className="text-2xl font-bold text-white">{power.number}</span>
+                    </div>
+                    <div className="flex-1">
+                        <p className="text-[10px] text-white/40 uppercase">Число Силы</p>
+                        <p className="text-[13px] text-white/80 mt-1">{power.meaning}</p>
+                    </div>
+                </div>
+
+                {/* Maturity Number */}
+                <div className="flex items-center gap-4 p-3 rounded-xl bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/20">
+                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center shadow-lg">
+                        <span className="text-2xl font-bold text-white">{maturity.number}</span>
+                    </div>
+                    <div className="flex-1">
+                        <p className="text-[10px] text-white/40 uppercase">Число Зрелости</p>
+                        <p className="text-[11px] text-white/60">Активируется: {maturity.activationAge}</p>
+                        <p className="text-[12px] text-white/80 mt-1">{maturity.meaning}</p>
+                    </div>
+                </div>
+            </div>
+        </Section>
+    );
+};
+
 // ==================== CELL MODAL ====================
 
 const CellModal = ({ num, count, onClose }) => {
@@ -1248,6 +1435,7 @@ const ResultDashboard = ({ data, onReset }) => {
             <DestinyGraphSection dateString={data.birthDate} />
 
             {/* === ПРОГНОЗЫ === */}
+            <BiorhythmSection birthDate={data.birthDate} />
             <DailyHoroscopeSection birthDate={data.birthDate} />
             <MonthlyHoroscopeSection birthDate={data.birthDate} />
             <YearForecastSection birthDate={data.birthDate} />
@@ -1255,9 +1443,13 @@ const ResultDashboard = ({ data, onReset }) => {
             <CompatibilitySection birthDate={data.birthDate} />
 
             {/* === АНАЛИЗ ЛИЧНОСТИ === */}
+            <PlanetarySection lifePath={lifePath} />
+            <TarotSection lifePath={lifePath} />
+            <PowerNumberSection lifePath={lifePath} name={data.name} />
             <PinnaclesSection birthDate={data.birthDate} />
             <TransitionSection birthDate={data.birthDate} />
             <KarmicSection matrix={matrix} />
+            <KarmicDebtSection birthDate={data.birthDate} name={data.name} />
             <HealthSection matrix={matrix} />
             <DevelopmentSection matrix={matrix} lifePath={lifePath} />
             <ChallengesSection birthDate={data.birthDate} />

@@ -1559,3 +1559,427 @@ const generateMonthSummary = (personalMonth, personalYear) => {
     };
     return summaries[personalMonth] || "Месяц развития и роста.";
 };
+
+// ==================== БИОРИТМЫ ====================
+
+/**
+ * Расчёт биоритмов по дате рождения
+ * Физический цикл: 23 дня
+ * Эмоциональный цикл: 28 дней
+ * Интеллектуальный цикл: 33 дня
+ */
+export const calculateBiorhythms = (birthDate) => {
+    const birth = new Date(birthDate);
+    const today = new Date();
+    const daysSinceBirth = Math.floor((today - birth) / (1000 * 60 * 60 * 24));
+
+    const physical = Math.sin((2 * Math.PI * daysSinceBirth) / 23);
+    const emotional = Math.sin((2 * Math.PI * daysSinceBirth) / 28);
+    const intellectual = Math.sin((2 * Math.PI * daysSinceBirth) / 33);
+
+    // Average for overall
+    const overall = (physical + emotional + intellectual) / 3;
+
+    return {
+        physical: Math.round(physical * 100),
+        emotional: Math.round(emotional * 100),
+        intellectual: Math.round(intellectual * 100),
+        overall: Math.round(overall * 100),
+        daysSinceBirth,
+        phases: {
+            physical: physical > 0.5 ? 'high' : physical < -0.5 ? 'low' : 'critical',
+            emotional: emotional > 0.5 ? 'high' : emotional < -0.5 ? 'low' : 'critical',
+            intellectual: intellectual > 0.5 ? 'high' : intellectual < -0.5 ? 'low' : 'critical'
+        },
+        advice: getBiorhythmAdvice(physical, emotional, intellectual)
+    };
+};
+
+const getBiorhythmAdvice = (p, e, i) => {
+    const advices = [];
+
+    if (p > 0.7) advices.push("Отличный день для спорта и физической активности");
+    else if (p < -0.7) advices.push("Берегите силы, избегайте перенапряжения");
+    else if (Math.abs(p) < 0.2) advices.push("Критический день для физики — будьте осторожны");
+
+    if (e > 0.7) advices.push("Прекрасное время для общения и отношений");
+    else if (e < -0.7) advices.push("Эмоции нестабильны, уделите время себе");
+    else if (Math.abs(e) < 0.2) advices.push("Эмоциональный критический день — избегайте конфликтов");
+
+    if (i > 0.7) advices.push("Идеально для обучения и принятия решений");
+    else if (i < -0.7) advices.push("Не лучший день для сложных задач");
+    else if (Math.abs(i) < 0.2) advices.push("Интеллектуальный критический день — перепроверяйте решения");
+
+    return advices.length > 0 ? advices : ["Сбалансированный день для всех активностей"];
+};
+
+// ==================== КАРМИЧЕСКИЕ ДОЛГИ ====================
+
+/**
+ * Числа кармического долга: 13, 14, 16, 19
+ * Проверяем их в дате рождения и имени
+ */
+export const calculateKarmicDebt = (birthDate, name) => {
+    const debts = [];
+
+    // Check birthdate
+    const [year, month, day] = birthDate.split('-').map(Number);
+    const dayCheck = day;
+    const monthDaySum = month + day;
+    const fullSum = year.toString().split('').reduce((a, b) => a + parseInt(b), 0) + month + day;
+
+    const karmicNumbers = [13, 14, 16, 19];
+    const meanings = {
+        13: {
+            name: "Смерть и Возрождение",
+            karma: "Лень и негативное мышление в прошлой жизни",
+            lesson: "Научиться упорному труду и позитивному настрою",
+            challenge: "Преодоление желания идти коротким путём",
+            advice: "Каждое препятствие — урок. Не ищите лёгких путей."
+        },
+        14: {
+            name: "Умеренность",
+            karma: "Злоупотребление свободой в прошлых жизнях",
+            lesson: "Научиться умеренности и ответственности",
+            challenge: "Склонность к зависимостям и импульсивности",
+            advice: "Дисциплина — ваш путь к свободе."
+        },
+        16: {
+            name: "Падение Башни",
+            karma: "Гордыня и эгоизм в прошлых воплощениях",
+            lesson: "Научиться смирению и принятию",
+            challenge: "Разрушение иллюзий может быть болезненным",
+            advice: "Примите перемены как возможность роста."
+        },
+        19: {
+            name: "Солнце",
+            karma: "Злоупотребление властью в прошлых жизнях",
+            lesson: "Научиться независимости без эгоизма",
+            challenge: "Баланс между самодостаточностью и помощью другим",
+            advice: "Ваша сила — в служении, не в доминировании."
+        }
+    };
+
+    // Check if any karmic numbers appear
+    [dayCheck, monthDaySum, fullSum].forEach(num => {
+        karmicNumbers.forEach(kNum => {
+            if (num === kNum && !debts.find(d => d.number === kNum)) {
+                debts.push({
+                    number: kNum,
+                    source: num === dayCheck ? 'День рождения' : num === monthDaySum ? 'Сумма дня+месяца' : 'Полная сумма',
+                    ...meanings[kNum]
+                });
+            }
+        });
+    });
+
+    return debts;
+};
+
+// ==================== АНГЕЛЬСКИЕ ЧИСЛА ====================
+
+export const getAngelNumberMeaning = (number) => {
+    const meanings = {
+        111: {
+            message: "Ваши мысли материализуются. Сфокусируйтесь на желаемом!",
+            energy: "Проявление",
+            action: "Визуализируйте свои цели"
+        },
+        222: {
+            message: "Всё идёт по плану. Доверьтесь процессу.",
+            energy: "Баланс",
+            action: "Сохраняйте терпение"
+        },
+        333: {
+            message: "Вознесённые Мастера рядом. Вы на верном пути!",
+            energy: "Поддержка",
+            action: "Расширяйте сознание"
+        },
+        444: {
+            message: "Ангелы окружают вас. Вы защищены.",
+            energy: "Защита",
+            action: "Продолжайте строить основу"
+        },
+        555: {
+            message: "Большие перемены приближаются. Примите их!",
+            energy: "Трансформация",
+            action: "Отпустите старое"
+        },
+        666: {
+            message: "Время балансировать материальное и духовное.",
+            energy: "Гармония",
+            action: "Фокус на внутреннем мире"
+        },
+        777: {
+            message: "Вы на пути духовного просветления. Чудеса близко!",
+            energy: "Духовность",
+            action: "Доверяйте интуиции"
+        },
+        888: {
+            message: "Изобилие течёт к вам. Примите благословения!",
+            energy: "Изобилие",
+            action: "Будьте открыты к получению"
+        },
+        999: {
+            message: "Цикл завершается. Готовьтесь к новому началу.",
+            energy: "Завершение",
+            action: "Отпустите с благодарностью"
+        },
+        1111: {
+            message: "Портал открыт! Мощное время для проявления.",
+            energy: "Пробуждение",
+            action: "Загадайте желание"
+        },
+        1212: {
+            message: "Оставайтесь позитивными. Ваши мечты реализуются.",
+            energy: "Оптимизм",
+            action: "Верьте в лучшее"
+        },
+        1234: {
+            message: "Вы на правильном пути. Шаг за шагом к цели!",
+            energy: "Прогресс",
+            action: "Продолжайте движение"
+        }
+    };
+
+    return meanings[number] || null;
+};
+
+// ==================== ПЛАНЕТАРНЫЕ АССОЦИАЦИИ ====================
+
+export const getPlanetaryAssociation = (number) => {
+    const planets = {
+        1: {
+            planet: "Солнце",
+            symbol: "☉",
+            energy: "Лидерство, эго, жизненная сила",
+            day: "Воскресенье",
+            color: "Золотой, оранжевый",
+            metal: "Золото",
+            gem: "Рубин, алмаз"
+        },
+        2: {
+            planet: "Луна",
+            symbol: "☽",
+            energy: "Эмоции, интуиция, подсознание",
+            day: "Понедельник",
+            color: "Серебряный, белый",
+            metal: "Серебро",
+            gem: "Жемчуг, лунный камень"
+        },
+        3: {
+            planet: "Юпитер",
+            symbol: "♃",
+            energy: "Расширение, удача, мудрость",
+            day: "Четверг",
+            color: "Пурпурный, синий",
+            metal: "Олово",
+            gem: "Аметист, сапфир"
+        },
+        4: {
+            planet: "Уран",
+            symbol: "♅",
+            energy: "Инновации, свобода, оригинальность",
+            day: "Суббота",
+            color: "Электрик, бирюзовый",
+            metal: "Уран",
+            gem: "Аквамарин"
+        },
+        5: {
+            planet: "Меркурий",
+            symbol: "☿",
+            energy: "Общение, интеллект, адаптация",
+            day: "Среда",
+            color: "Зелёный, жёлтый",
+            metal: "Ртуть",
+            gem: "Изумруд, хризолит"
+        },
+        6: {
+            planet: "Венера",
+            symbol: "♀",
+            energy: "Любовь, красота, гармония",
+            day: "Пятница",
+            color: "Розовый, бирюзовый",
+            metal: "Медь",
+            gem: "Изумруд, розовый кварц"
+        },
+        7: {
+            planet: "Нептун",
+            symbol: "♆",
+            energy: "Духовность, мистика, иллюзии",
+            day: "Понедельник",
+            color: "Фиолетовый, морской",
+            metal: "Платина",
+            gem: "Аметист, лазурит"
+        },
+        8: {
+            planet: "Сатурн",
+            symbol: "♄",
+            energy: "Дисциплина, карма, структура",
+            day: "Суббота",
+            color: "Чёрный, тёмно-синий",
+            metal: "Свинец",
+            gem: "Оникс, обсидиан"
+        },
+        9: {
+            planet: "Марс",
+            symbol: "♂",
+            energy: "Действие, страсть, воля",
+            day: "Вторник",
+            color: "Красный, алый",
+            metal: "Железо",
+            gem: "Рубин, гранат"
+        },
+        11: {
+            planet: "Плутон",
+            symbol: "♇",
+            energy: "Трансформация, глубина, власть",
+            day: "Вторник",
+            color: "Тёмно-красный",
+            metal: "Плутоний",
+            gem: "Топаз, чёрный турмалин"
+        },
+        22: {
+            planet: "Вулкан",
+            symbol: "⚒",
+            energy: "Мастерство, созидание, материализация",
+            day: "Суббота",
+            color: "Золотой",
+            metal: "Титан",
+            gem: "Алмаз"
+        },
+        33: {
+            planet: "Хирон",
+            symbol: "⚷",
+            energy: "Исцеление, учительство, сострадание",
+            day: "Четверг",
+            color: "Бирюзовый",
+            metal: "Платина",
+            gem: "Бирюза"
+        }
+    };
+
+    return planets[number] || planets[reduceToSingle(number)];
+};
+
+// ==================== ЧИСЛО СИЛЫ ====================
+
+/**
+ * Число Силы = Число Жизненного Пути + Число Выражения
+ * Показывает ваш главный талант
+ */
+export const calculatePowerNumber = (lifePath, expressionNumber) => {
+    const power = reduceToSingle(lifePath + expressionNumber);
+
+    const meanings = {
+        1: "Сила Лидерства — вы прирождённый новатор и первопроходец",
+        2: "Сила Дипломатии — вы мастер переговоров и медиатор",
+        3: "Сила Творчества — вы вдохновляете и развлекаете",
+        4: "Сила Построения — вы создаёте прочные структуры",
+        5: "Сила Перемен — вы катализатор трансформаций",
+        6: "Сила Заботы — вы целитель и хранитель гармонии",
+        7: "Сила Мудрости — вы искатель истины и мистик",
+        8: "Сила Материализации — вы притягиваете богатство",
+        9: "Сила Человечности — вы служите высшей цели",
+        11: "Сила Просветления — вы духовный маяк",
+        22: "Сила Мастера — вы строитель империй",
+        33: "Сила Учителя — вы несёте свет миру"
+    };
+
+    return {
+        number: power,
+        meaning: meanings[power] || meanings[reduceToSingle(power)]
+    };
+};
+
+// ==================== ЧИСЛО ЗРЕЛОСТИ ====================
+
+/**
+ * Число Зрелости = Число ЖП + Число Выражения
+ * Проявляется после 40-45 лет
+ */
+export const calculateMaturityNumber = (lifePath, expressionNumber) => {
+    const maturity = reduceToSingle(lifePath + expressionNumber);
+
+    const meanings = {
+        1: "Во второй половине жизни усилится независимость и лидерство. Вы найдёте свой уникальный путь.",
+        2: "Зрелость принесёт гармонию в отношениях. Партнёрства станут важнее индивидуальных достижений.",
+        3: "С возрастом усилится творческое самовыражение. Ваш голос будет услышан.",
+        4: "Зрелость принесёт стабильность и безопасность. Ваши труды окупятся.",
+        5: "Вторая половина жизни будет полна приключений и свободы.",
+        6: "С возрастом вы станете центром семьи и сообщества. Ваша мудрость нужна другим.",
+        7: "Зрелость углубит духовные поиски. Вы найдёте ответы на главные вопросы.",
+        8: "Материальный успех придёт в зрелые годы. Ваше влияние вырастет.",
+        9: "С возрастом усилится желание служить человечеству. Вы оставите значимое наследие.",
+        11: "Зрелость раскроет ваши интуитивные способности в полной мере.",
+        22: "Во второй половине жизни вы создадите нечто грандиозное.",
+        33: "С возрастом вы станете духовным наставником для многих."
+    };
+
+    return {
+        number: maturity,
+        meaning: meanings[maturity] || meanings[reduceToSingle(maturity)],
+        activationAge: "40-45 лет"
+    };
+};
+
+// ==================== СУБСТРАКТИВНЫЕ ЧИСЛА ====================
+
+/**
+ * Разница между основными числами показывает внутренние конфликты
+ */
+export const calculateSubtractiveNumbers = (lifePath, expression, soulUrge) => {
+    const conflicts = [];
+
+    const diff1 = Math.abs(lifePath - expression);
+    const diff2 = Math.abs(lifePath - soulUrge);
+    const diff3 = Math.abs(expression - soulUrge);
+
+    if (diff1 > 4) {
+        conflicts.push({
+            between: "Путь и Выражение",
+            tension: diff1,
+            meaning: "Конфликт между тем, кто вы есть и как себя проявляете"
+        });
+    }
+
+    if (diff2 > 4) {
+        conflicts.push({
+            between: "Путь и Душа",
+            tension: diff2,
+            meaning: "Ваши желания не всегда совпадают с жизненным путём"
+        });
+    }
+
+    if (diff3 > 4) {
+        conflicts.push({
+            between: "Выражение и Душа",
+            tension: diff3,
+            meaning: "То, что вы показываете миру, отличается от истинных желаний"
+        });
+    }
+
+    return conflicts;
+};
+
+// ==================== ТАРО-СВЯЗИ ====================
+
+export const getTarotConnection = (lifePath) => {
+    const tarot = {
+        1: { card: "Маг", meaning: "Воля, мастерство, проявление", arcana: "I" },
+        2: { card: "Верховная Жрица", meaning: "Интуиция, тайны, внутреннее знание", arcana: "II" },
+        3: { card: "Императрица", meaning: "Творчество, изобилие, красота", arcana: "III" },
+        4: { card: "Император", meaning: "Структура, власть, стабильность", arcana: "IV" },
+        5: { card: "Иерофант", meaning: "Традиции, духовность, учение", arcana: "V" },
+        6: { card: "Влюблённые", meaning: "Выбор, любовь, гармония", arcana: "VI" },
+        7: { card: "Колесница", meaning: "Воля, победа, контроль", arcana: "VII" },
+        8: { card: "Сила", meaning: "Внутренняя сила, мужество, терпение", arcana: "VIII" },
+        9: { card: "Отшельник", meaning: "Мудрость, поиск истины, уединение", arcana: "IX" },
+        11: { card: "Справедливость", meaning: "Карма, баланс, истина", arcana: "XI" },
+        22: { card: "Шут", meaning: "Новые начинания, свобода, потенциал", arcana: "0" },
+        33: { card: "Мир", meaning: "Завершение, интеграция, успех", arcana: "XXI" }
+    };
+
+    return tarot[lifePath] || tarot[reduceToSingle(lifePath)];
+};
+
