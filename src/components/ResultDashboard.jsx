@@ -1,0 +1,1278 @@
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+    calculatePsychomatrix, calculateLifePathNumber, getLifePathMeaning, getLifePathDetailed,
+    getCellInfo, getCellDetailedMeaning, calculateLines, getLineMeaning, calculateDestinyGraph,
+    calculateExpressionNumber, calculateSoulUrgeNumber, calculatePersonalityNumber, getNameNumberMeaning,
+    calculatePersonalYear, calculatePersonalMonth, calculatePersonalDay, getPersonalCycleMeaning,
+    getLuckyElements, calculateBirthdayNumber, getBirthdayNumberMeaning,
+    calculateKarmicLessons, getKarmicLessonMeaning, calculateLifePinnacles, getPinnacleMeaning,
+    calculateTransitionAges, getHealthAnalysis, getDevelopmentAdvice,
+    calculateChallengeNumbers, getChallengeMeaning,
+    calculateHiddenPassions, getHiddenPassionMeaning,
+    getDailyAffirmation, getLoveAdvice, getFinancialProfile, getSoulMission,
+    calculateFullCompatibility, getYearForecast, calculateLuckyDates,
+    getDailyHoroscope, getMonthlyHoroscope
+} from '../utils/numerology';
+import {
+    RotateCcw, Sparkles, Grid3X3, TrendingUp, ChevronDown,
+    User, Calendar, Gem, Zap, AlertCircle, Mountain, Heart, Lightbulb, Star, Clock, Gift,
+    Flame, DollarSign, Target, Quote, Users, Sun, Moon, CalendarDays
+} from 'lucide-react';
+
+// ==================== PREMIUM COMPONENTS ====================
+
+const GlowNumber = ({ number, size = 'lg', color = 'purple' }) => (
+    <div className="relative flex items-center justify-center">
+        <div className={`absolute inset-0 bg-gradient-to-r from-${color}-500 to-pink-500 blur-2xl opacity-50 rounded-full scale-150`} />
+        <span className={`relative z-10 font-display font-bold bg-gradient-to-br from-white via-${color}-200 to-pink-200 bg-clip-text text-transparent ${size === 'lg' ? 'text-6xl' : size === 'md' ? 'text-3xl' : 'text-xl'
+            }`}>
+            {number}
+        </span>
+    </div>
+);
+
+const PremiumCard = ({ children, className = '', gradient = false }) => (
+    <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        className={`relative overflow-hidden rounded-3xl p-4 
+      bg-gradient-to-br from-white/[0.08] to-white/[0.02]
+      backdrop-blur-xl border border-white/10
+      shadow-[0_8px_32px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.1)]
+      ${gradient ? 'before:absolute before:inset-0 before:bg-gradient-to-r before:from-purple-500/10 before:via-transparent before:to-pink-500/10' : ''}
+      ${className}`}
+    >
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/50 to-transparent" />
+        {children}
+    </motion.div>
+);
+
+const Section = ({ icon: Icon, title, badge, children, defaultOpen = false }) => {
+    const [open, setOpen] = useState(defaultOpen);
+    return (
+        <PremiumCard>
+            <button onClick={() => setOpen(!open)} className="w-full flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-purple-500/30 to-pink-500/20 flex items-center justify-center border border-purple-500/20">
+                        <Icon size={16} className="text-purple-300" />
+                    </div>
+                    <span className="text-[14px] font-semibold text-white">{title}</span>
+                    {badge && (
+                        <span className="px-2 py-0.5 text-[9px] font-semibold bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 text-emerald-300 rounded-full border border-emerald-500/30 animate-pulse">
+                            {badge}
+                        </span>
+                    )}
+                </div>
+                <motion.div animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.3 }}>
+                    <ChevronDown size={18} className="text-white/40" />
+                </motion.div>
+            </button>
+            <AnimatePresence>
+                {open && (
+                    <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3, ease: 'easeInOut' }}
+                        className="overflow-hidden"
+                    >
+                        <div className="mt-4 space-y-3">{children}</div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </PremiumCard>
+    );
+};
+
+// ==================== PSYCHOMATRIX ====================
+
+const PsychomatrixGrid = ({ matrix, onCellClick }) => {
+    const cellOrder = [1, 4, 7, 2, 5, 8, 3, 6, 9];
+    const gradients = [
+        'from-rose-500 to-orange-500',
+        'from-amber-500 to-yellow-500',
+        'from-lime-500 to-emerald-500',
+        'from-teal-500 to-cyan-500',
+        'from-sky-500 to-blue-500',
+        'from-indigo-500 to-violet-500',
+        'from-purple-500 to-fuchsia-500',
+        'from-pink-500 to-rose-500',
+        'from-red-500 to-pink-500'
+    ];
+
+    return (
+        <div className="grid grid-cols-3 gap-2.5 p-4 rounded-2xl bg-black/40 border border-white/5">
+            {cellOrder.map((num, i) => {
+                const info = getCellInfo(num);
+                const count = matrix[num] || 0;
+                return (
+                    <motion.button
+                        key={num}
+                        onClick={() => onCellClick(num)}
+                        whileHover={{ scale: 1.08, rotate: 2 }}
+                        whileTap={{ scale: 0.95 }}
+                        className={`aspect-square rounded-2xl p-2 flex flex-col items-center justify-center relative overflow-hidden transition-all duration-300
+              ${count > 0 ? `bg-gradient-to-br ${gradients[i]} shadow-lg` : 'bg-white/5'}
+              border border-white/20 hover:border-white/40`}
+                        style={{ boxShadow: count > 0 ? `0 8px 24px ${['#f43f5e', '#f59e0b', '#22c55e', '#14b8a6', '#0ea5e9', '#8b5cf6', '#a855f7', '#ec4899', '#ef4444'][i]}30` : 'none' }}
+                    >
+                        <span className="absolute top-1.5 left-2 text-[8px] uppercase font-medium text-white/60">{info.label}</span>
+                        <div className={`text-2xl font-bold ${count > 0 ? 'text-white drop-shadow-lg' : 'text-white/20'}`}>
+                            {count > 0 ? num.toString().repeat(Math.min(count, 3)) : '—'}
+                        </div>
+                        {count > 0 && (
+                            <div className="absolute bottom-1.5 right-2 px-1.5 py-0.5 rounded-md bg-black/30 backdrop-blur-sm">
+                                <span className="text-[9px] font-bold text-white">{count}</span>
+                            </div>
+                        )}
+                    </motion.button>
+                );
+            })}
+        </div>
+    );
+};
+
+// ==================== LIFE PATH ====================
+
+const LifePathSection = ({ lifePath, meaning, details }) => (
+    <PremiumCard gradient className="relative">
+        <div className="absolute -top-20 -right-20 w-40 h-40 bg-purple-500/30 rounded-full blur-3xl" />
+        <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-pink-500/20 rounded-full blur-3xl" />
+        <div className="relative z-10">
+            <div className="flex items-center gap-2 mb-5">
+                <Star className="text-yellow-400" size={20} />
+                <span className="text-[11px] uppercase tracking-widest text-white/50 font-medium">Число Жизненного Пути</span>
+            </div>
+            <div className="flex items-start gap-6">
+                <GlowNumber number={lifePath} />
+                <div className="flex-1 pt-2">
+                    <p className="text-[14px] text-white/80 italic leading-relaxed font-light">"{meaning}"</p>
+                </div>
+            </div>
+            {details && (
+                <div className="mt-5 pt-5 border-t border-white/10 space-y-4">
+                    <p className="text-[12px] text-purple-300 font-medium">{details.mission}</p>
+                    <div className="flex flex-wrap gap-2">
+                        {details.strengths.map((s, i) => (
+                            <span key={i} className="px-3 py-1.5 text-[10px] font-medium rounded-xl bg-gradient-to-r from-emerald-500/20 to-teal-500/20 text-emerald-300 border border-emerald-500/30">{s}</span>
+                        ))}
+                    </div>
+                    <div className="p-3 rounded-xl bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20">
+                        <p className="text-[11px] text-amber-200">💡 {details.advice}</p>
+                    </div>
+                </div>
+            )}
+        </div>
+    </PremiumCard>
+);
+
+// ==================== BIRTHDAY NUMBER ====================
+
+const BirthdaySection = ({ birthDate }) => {
+    const num = calculateBirthdayNumber(birthDate);
+    const meaning = getBirthdayNumberMeaning(num);
+    return (
+        <Section icon={Gift} title="Число Дня Рождения">
+            <div className="flex items-center gap-4 p-4 rounded-2xl bg-gradient-to-br from-orange-500/10 to-amber-500/10 border border-orange-500/20">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center shadow-lg shadow-orange-500/30">
+                    <span className="text-3xl font-bold text-white">{num}</span>
+                </div>
+                <div className="flex-1">
+                    <p className="text-[14px] font-semibold text-white">{meaning.title}</p>
+                    <p className="text-[11px] text-white/60 mt-1 leading-relaxed">{meaning.desc}</p>
+                </div>
+            </div>
+        </Section>
+    );
+};
+
+// ==================== PERSONAL CYCLES ====================
+
+const PersonalCyclesSection = ({ birthDate }) => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1;
+    const day = now.getDate();
+    const todayStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+    const cycles = [
+        { label: `Год ${year}`, num: calculatePersonalYear(birthDate, year), ...getPersonalCycleMeaning(calculatePersonalYear(birthDate, year)) },
+        { label: 'Месяц', num: calculatePersonalMonth(birthDate, year, month), ...getPersonalCycleMeaning(calculatePersonalMonth(birthDate, year, month)) },
+        { label: 'Сегодня', num: calculatePersonalDay(birthDate, todayStr), ...getPersonalCycleMeaning(calculatePersonalDay(birthDate, todayStr)) }
+    ];
+
+    return (
+        <Section icon={Zap} title="Энергия Сейчас" badge="LIVE">
+            {cycles.map((c, i) => (
+                <motion.div
+                    key={i}
+                    initial={{ x: -20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: i * 0.1 }}
+                    className="flex items-center gap-4 p-3 rounded-2xl bg-white/5 border border-white/5 hover:border-white/10 transition-all"
+                >
+                    <div
+                        className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-lg"
+                        style={{ background: `linear-gradient(135deg, ${c.color}40, ${c.color}20)`, boxShadow: `0 4px 20px ${c.color}30` }}
+                    >
+                        {c.energy}
+                    </div>
+                    <div className="flex-1">
+                        <div className="flex items-center justify-between mb-0.5">
+                            <span className="text-[10px] uppercase tracking-wide text-white/40 font-medium">{c.label}</span>
+                            <span className="text-xl font-bold font-display" style={{ color: c.color }}>{c.num}</span>
+                        </div>
+                        <p className="text-[12px] text-white/70 font-medium">{c.title}</p>
+                        <p className="text-[10px] text-white/40 mt-0.5">{c.advice}</p>
+                    </div>
+                </motion.div>
+            ))}
+        </Section>
+    );
+};
+
+// ==================== NAME NUMEROLOGY ====================
+
+const NameSection = ({ name }) => {
+    const data = [
+        { type: 'expression', label: 'Выражение', num: calculateExpressionNumber(name), gradient: 'from-purple-500 to-violet-500' },
+        { type: 'soulUrge', label: 'Душа', num: calculateSoulUrgeNumber(name), gradient: 'from-pink-500 to-rose-500' },
+        { type: 'personality', label: 'Личность', num: calculatePersonalityNumber(name), gradient: 'from-cyan-500 to-blue-500' }
+    ];
+    return (
+        <Section icon={User} title="Нумерология Имени">
+            <div className="grid grid-cols-3 gap-2">
+                {data.map(d => {
+                    const m = getNameNumberMeaning(d.type, d.num);
+                    return (
+                        <motion.div
+                            key={d.type}
+                            whileHover={{ scale: 1.05, y: -2 }}
+                            className={`p-3 rounded-2xl bg-gradient-to-br ${d.gradient} bg-opacity-20 border border-white/10 text-center relative overflow-hidden`}
+                            style={{ background: `linear-gradient(135deg, ${d.gradient.includes('purple') ? '#8b5cf6' : d.gradient.includes('pink') ? '#ec4899' : '#06b6d4'}15, transparent)` }}
+                        >
+                            <span className="text-3xl font-bold text-white drop-shadow-lg">{d.num}</span>
+                            <p className="text-[9px] uppercase tracking-wide text-white/50 mt-1 font-medium">{d.label}</p>
+                            <p className="text-[10px] text-white/70 mt-0.5">{m.title}</p>
+                        </motion.div>
+                    );
+                })}
+            </div>
+        </Section>
+    );
+};
+
+// ==================== LIFE PINNACLES ====================
+
+const PinnaclesSection = ({ birthDate }) => {
+    const pinnacles = calculateLifePinnacles(birthDate);
+    const colors = ['#f43f5e', '#14b8a6', '#f59e0b', '#8b5cf6'];
+
+    return (
+        <Section icon={Mountain} title="Пики Жизни">
+            <div className="relative">
+                {/* Timeline line */}
+                <div className="absolute left-5 top-0 bottom-0 w-0.5 bg-gradient-to-b from-rose-500 via-teal-500 via-amber-500 to-purple-500 rounded-full" />
+
+                <div className="space-y-3">
+                    {pinnacles.map((peak, i) => (
+                        <motion.div
+                            key={i}
+                            initial={{ x: -20, opacity: 0 }}
+                            animate={{ x: 0, opacity: 1 }}
+                            transition={{ delay: i * 0.1 }}
+                            className="flex items-start gap-4 pl-2"
+                        >
+                            <div
+                                className="w-7 h-7 rounded-full flex items-center justify-center z-10 shadow-lg"
+                                style={{ background: colors[i], boxShadow: `0 4px 15px ${colors[i]}50` }}
+                            >
+                                <span className="text-xs font-bold text-white">{i + 1}</span>
+                            </div>
+                            <div className="flex-1 p-3 rounded-xl bg-white/5 border border-white/5">
+                                <div className="flex items-center justify-between mb-1">
+                                    <span className="text-[11px] font-medium text-white">{peak.title}</span>
+                                    <span className="text-[9px] text-white/40">{peak.ages} лет</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-xl font-bold" style={{ color: colors[i] }}>{peak.number}</span>
+                                    <p className="text-[10px] text-white/50 flex-1">{getPinnacleMeaning(peak.number)}</p>
+                                </div>
+                            </div>
+                        </motion.div>
+                    ))}
+                </div>
+            </div>
+        </Section>
+    );
+};
+
+// ==================== TRANSITION AGES ====================
+
+const TransitionSection = ({ birthDate }) => {
+    const ages = calculateTransitionAges(birthDate);
+    const [year] = birthDate.split('-').map(Number);
+    const currentAge = new Date().getFullYear() - year;
+
+    return (
+        <Section icon={Clock} title="Ключевые Возрасты">
+            <div className="flex gap-2 overflow-x-auto pb-2">
+                {ages.map((item, i) => {
+                    const isCurrent = Math.abs(currentAge - item.age) <= 3;
+                    const isPast = currentAge > item.age + 3;
+                    return (
+                        <motion.div
+                            key={i}
+                            whileHover={{ scale: 1.05 }}
+                            className={`flex-shrink-0 w-20 p-3 rounded-2xl text-center border transition-all ${isCurrent
+                                ? 'bg-gradient-to-br from-purple-500/30 to-pink-500/20 border-purple-500/50 shadow-lg shadow-purple-500/20'
+                                : isPast
+                                    ? 'bg-white/5 border-white/5 opacity-50'
+                                    : 'bg-white/5 border-white/10'
+                                }`}
+                        >
+                            <span className={`text-2xl font-bold ${isCurrent ? 'text-purple-300' : 'text-white/60'}`}>{item.age}</span>
+                            <p className="text-[9px] text-white/50 mt-1 font-medium">{item.title}</p>
+                            {isCurrent && <span className="inline-block mt-1 px-1.5 py-0.5 text-[8px] bg-purple-500/30 text-purple-200 rounded-full">Сейчас</span>}
+                        </motion.div>
+                    );
+                })}
+            </div>
+        </Section>
+    );
+};
+
+// ==================== LINES ====================
+
+const LinesSection = ({ matrix }) => {
+    const lines = calculateLines(matrix);
+    const all = [
+        ...Object.entries(lines.rows).map(([k, v]) => ({ key: k, value: v })),
+        ...Object.entries(lines.columns).map(([k, v]) => ({ key: k, value: v })),
+        ...Object.entries(lines.diagonals).map(([k, v]) => ({ key: k, value: v }))
+    ];
+
+    return (
+        <Section icon={TrendingUp} title="Линии Судьбы">
+            <div className="space-y-2.5">
+                {all.map(({ key, value }, i) => {
+                    const m = getLineMeaning(key, value);
+                    if (!m) return null;
+                    const pct = Math.min(value / 8 * 100, 100);
+                    return (
+                        <motion.div
+                            key={key}
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: i * 0.05 }}
+                            className="p-3 rounded-xl bg-white/5 border border-white/5"
+                        >
+                            <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-2">
+                                    <span className="text-lg">{m.icon}</span>
+                                    <span className="text-[12px] font-medium text-white">{m.name}</span>
+                                </div>
+                                <span className="text-[11px] text-purple-300 font-medium">{m.title}</span>
+                            </div>
+                            <div className="h-2 rounded-full bg-white/10 overflow-hidden">
+                                <motion.div
+                                    initial={{ width: 0 }}
+                                    animate={{ width: `${pct}%` }}
+                                    transition={{ duration: 1, ease: 'easeOut', delay: i * 0.05 }}
+                                    className="h-full rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500"
+                                />
+                            </div>
+                        </motion.div>
+                    );
+                })}
+            </div>
+        </Section>
+    );
+};
+
+// ==================== DESTINY GRAPH ====================
+
+const DestinyGraphSection = ({ dateString }) => {
+    const points = calculateDestinyGraph(dateString);
+    if (!points.length) return null;
+
+    return (
+        <Section icon={TrendingUp} title="График Судьбы">
+            <div className="h-36 rounded-2xl bg-black/40 p-4 relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-t from-purple-500/10 to-transparent" />
+                <svg className="w-full h-full relative z-10" viewBox="0 0 280 100" preserveAspectRatio="none">
+                    <defs>
+                        <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stopColor="#8b5cf6" />
+                            <stop offset="50%" stopColor="#ec4899" />
+                            <stop offset="100%" stopColor="#f97316" />
+                        </linearGradient>
+                        <filter id="glow">
+                            <feGaussianBlur stdDeviation="2" result="coloredBlur" />
+                            <feMerge><feMergeNode in="coloredBlur" /><feMergeNode in="SourceGraphic" /></feMerge>
+                        </filter>
+                    </defs>
+                    {[0, 25, 50, 75, 100].map(y => <line key={y} x1="0" y1={y} x2="280" y2={y} stroke="rgba(255,255,255,0.05)" />)}
+                    <motion.polyline
+                        initial={{ pathLength: 0 }}
+                        animate={{ pathLength: 1 }}
+                        transition={{ duration: 2, ease: 'easeInOut' }}
+                        fill="none"
+                        stroke="url(#lineGrad)"
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                        filter="url(#glow)"
+                        points={points.map((p, i) => `${10 + i * 43},${100 - (p.destiny / 9) * 90}`).join(' ')}
+                    />
+                    {points.map((p, i) => (
+                        <motion.circle
+                            key={i}
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ delay: 0.3 + i * 0.15 }}
+                            cx={10 + i * 43}
+                            cy={100 - (p.destiny / 9) * 90}
+                            r="6"
+                            fill="#8b5cf6"
+                            stroke="#fff"
+                            strokeWidth="2"
+                            filter="url(#glow)"
+                        />
+                    ))}
+                </svg>
+                <div className="absolute bottom-2 left-0 right-0 flex justify-between px-4 text-[9px] text-white/40 font-medium">
+                    {points.map((p, i) => <span key={i}>{p.age}</span>)}
+                </div>
+            </div>
+        </Section>
+    );
+};
+
+// ==================== KARMIC LESSONS ====================
+
+const KarmicSection = ({ matrix }) => {
+    const lessons = calculateKarmicLessons(matrix);
+    if (!lessons.length) return (
+        <Section icon={AlertCircle} title="Кармические Уроки">
+            <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-500/20 to-teal-500/10 border border-emerald-500/30">
+                <p className="text-[12px] text-emerald-300 font-medium">✓ Все числа присутствуют — карма сбалансирована</p>
+            </div>
+        </Section>
+    );
+
+    return (
+        <Section icon={AlertCircle} title="Кармические Уроки">
+            {lessons.slice(0, 3).map((num, i) => {
+                const m = getKarmicLessonMeaning(num);
+                return (
+                    <motion.div
+                        key={num}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: i * 0.1 }}
+                        className="p-4 rounded-2xl bg-gradient-to-r from-amber-500/15 to-orange-500/10 border border-amber-500/30"
+                    >
+                        <div className="flex items-center gap-3 mb-2">
+                            <span className="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-white text-sm font-bold shadow-lg shadow-amber-500/30">{num}</span>
+                            <span className="text-[13px] font-semibold text-white">{m.lesson}</span>
+                        </div>
+                        <p className="text-[11px] text-white/60 leading-relaxed">{m.how}</p>
+                    </motion.div>
+                );
+            })}
+        </Section>
+    );
+};
+
+// ==================== HEALTH ====================
+
+const HealthSection = ({ matrix }) => {
+    const recs = getHealthAnalysis(matrix);
+    if (!recs.length) return null;
+    return (
+        <Section icon={Heart} title="Здоровье и Энергия">
+            {recs.map((r, i) => (
+                <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.1 }}
+                    className={`p-4 rounded-2xl border ${r.status === 'Сильное'
+                        ? 'bg-gradient-to-r from-emerald-500/15 to-teal-500/10 border-emerald-500/30'
+                        : 'bg-gradient-to-r from-amber-500/15 to-orange-500/10 border-amber-500/30'}`}
+                >
+                    <div className="flex items-center justify-between mb-2">
+                        <span className="text-[13px] font-semibold text-white">{r.area}</span>
+                        <span className={`px-2 py-1 rounded-lg text-[9px] font-bold ${r.status === 'Сильное' ? 'bg-emerald-500/30 text-emerald-300' : 'bg-amber-500/30 text-amber-300'}`}>{r.status}</span>
+                    </div>
+                    <p className="text-[11px] text-white/60 leading-relaxed">{r.advice}</p>
+                </motion.div>
+            ))}
+        </Section>
+    );
+};
+
+// ==================== DEVELOPMENT ====================
+
+const DevelopmentSection = ({ matrix, lifePath }) => {
+    const advice = getDevelopmentAdvice(matrix, lifePath);
+    if (!advice.length) return null;
+
+    const develop = advice.filter(a => a.type === 'develop');
+    const use = advice.filter(a => a.type === 'use');
+
+    return (
+        <Section icon={Lightbulb} title="Рекомендации">
+            <div className="space-y-4">
+                {develop.length > 0 && (
+                    <div>
+                        <p className="text-[10px] uppercase tracking-wide text-amber-400 font-semibold mb-2">🔧 Развивать</p>
+                        {develop.map((a, i) => (
+                            <p key={i} className="text-[11px] text-white/70 pl-4 py-2 border-l-2 border-amber-500/50 mb-1">{a.text}</p>
+                        ))}
+                    </div>
+                )}
+                {use.length > 0 && (
+                    <div>
+                        <p className="text-[10px] uppercase tracking-wide text-emerald-400 font-semibold mb-2">✨ Использовать</p>
+                        {use.map((a, i) => (
+                            <p key={i} className="text-[11px] text-white/70 pl-4 py-2 border-l-2 border-emerald-500/50 mb-1">{a.text}</p>
+                        ))}
+                    </div>
+                )}
+            </div>
+        </Section>
+    );
+};
+
+// ==================== LUCKY ELEMENTS ====================
+
+const LuckySection = ({ lifePath }) => {
+    const lucky = getLuckyElements(lifePath);
+    const cards = [
+        { label: 'Числа', icon: '🔢', content: lucky.numbers.slice(0, 4), gradient: 'from-yellow-500 to-amber-500' },
+        { label: 'Цвета', icon: '🎨', content: lucky.colors, gradient: 'from-pink-500 to-rose-500' },
+        { label: 'Дни', icon: '📅', content: lucky.days, gradient: 'from-cyan-500 to-blue-500' },
+        { label: 'Камни', icon: '💎', content: lucky.stones, gradient: 'from-purple-500 to-violet-500' }
+    ];
+
+    return (
+        <Section icon={Gem} title="Счастливые Элементы">
+            <div className="grid grid-cols-2 gap-3">
+                {cards.map((card, i) => (
+                    <motion.div
+                        key={i}
+                        whileHover={{ scale: 1.03, y: -2 }}
+                        className={`p-4 rounded-2xl bg-gradient-to-br ${card.gradient} bg-opacity-10 border border-white/10 relative overflow-hidden`}
+                        style={{ background: `linear-gradient(135deg, ${card.gradient.includes('yellow') ? '#eab308' : card.gradient.includes('pink') ? '#ec4899' : card.gradient.includes('cyan') ? '#06b6d4' : '#8b5cf6'}15, transparent)` }}
+                    >
+                        <div className="flex items-center gap-2 mb-2">
+                            <span className="text-lg">{card.icon}</span>
+                            <span className="text-[10px] uppercase tracking-wide text-white/50 font-semibold">{card.label}</span>
+                        </div>
+                        {Array.isArray(card.content) && typeof card.content[0] === 'number' ? (
+                            <div className="flex gap-1.5">
+                                {card.content.map(n => (
+                                    <span key={n} className="px-2 py-1 rounded-lg bg-white/10 text-white text-xs font-bold">{n}</span>
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="text-[11px] text-white/80 leading-relaxed">{card.content.join(', ')}</p>
+                        )}
+                    </motion.div>
+                ))}
+            </div>
+        </Section>
+    );
+};
+
+// ==================== DAILY AFFIRMATION ====================
+
+const AffirmationSection = ({ birthDate }) => {
+    const [affirmation, setAffirmation] = useState('');
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1;
+    const day = now.getDate();
+    const todayStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    const personalDay = calculatePersonalDay(birthDate, todayStr);
+
+    useEffect(() => {
+        setAffirmation(getDailyAffirmation(personalDay));
+    }, [personalDay]);
+
+    return (
+        <PremiumCard gradient>
+            <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                    <Quote size={20} className="text-white" />
+                </div>
+                <div className="flex-1">
+                    <p className="text-[10px] uppercase tracking-widest text-white/40 mb-2">Аффирмация дня</p>
+                    <p className="text-[14px] text-white font-medium italic leading-relaxed">"{affirmation}"</p>
+                </div>
+            </div>
+        </PremiumCard>
+    );
+};
+
+// ==================== CHALLENGE NUMBERS ====================
+
+const ChallengesSection = ({ birthDate }) => {
+    const challenges = calculateChallengeNumbers(birthDate);
+    const colors = ['#ef4444', '#f97316', '#eab308', '#22c55e'];
+
+    return (
+        <Section icon={Target} title="Числа Испытания">
+            <p className="text-[10px] text-white/40 mb-3">Уроки, которые предстоит пройти в разные периоды жизни</p>
+            <div className="space-y-2">
+                {challenges.map((ch, i) => {
+                    const meaning = getChallengeMeaning(ch.number);
+                    return (
+                        <motion.div
+                            key={i}
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: i * 0.1 }}
+                            className="p-3 rounded-xl bg-white/5 border border-white/5"
+                        >
+                            <div className="flex items-center gap-3 mb-2">
+                                <div
+                                    className="w-8 h-8 rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-lg"
+                                    style={{ background: colors[i], boxShadow: `0 4px 15px ${colors[i]}40` }}
+                                >
+                                    {ch.number}
+                                </div>
+                                <div className="flex-1">
+                                    <p className="text-[11px] font-medium text-white">{meaning.title}</p>
+                                    <p className="text-[9px] text-white/40">{ch.period}</p>
+                                </div>
+                            </div>
+                            <p className="text-[10px] text-white/60">{meaning.desc}</p>
+                            <p className="text-[9px] text-amber-300 mt-1">💡 {meaning.advice}</p>
+                        </motion.div>
+                    );
+                })}
+            </div>
+        </Section>
+    );
+};
+
+// ==================== HIDDEN PASSIONS ====================
+
+const HiddenPassionsSection = ({ name }) => {
+    const passions = calculateHiddenPassions(name);
+
+    if (passions.length === 0) return null;
+
+    return (
+        <Section icon={Flame} title="Скрытые Страсти">
+            <p className="text-[10px] text-white/40 mb-3">Глубинные мотивации, проявляющиеся в вашем имени</p>
+            <div className="space-y-2">
+                {passions.map((p, i) => {
+                    const meaning = getHiddenPassionMeaning(p.number);
+                    return (
+                        <motion.div
+                            key={i}
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: i * 0.1 }}
+                            className="p-4 rounded-2xl bg-gradient-to-r from-orange-500/15 to-red-500/10 border border-orange-500/30"
+                        >
+                            <div className="flex items-center gap-3 mb-2">
+                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center shadow-lg shadow-orange-500/30">
+                                    <span className="text-lg font-bold text-white">{p.number}</span>
+                                </div>
+                                <div>
+                                    <p className="text-[12px] font-semibold text-white">{meaning.title}</p>
+                                    <p className="text-[9px] text-white/40">Встречается {p.count} раз</p>
+                                </div>
+                            </div>
+                            <p className="text-[11px] text-white/60">{meaning.desc}</p>
+                        </motion.div>
+                    );
+                })}
+            </div>
+        </Section>
+    );
+};
+
+// ==================== LOVE ADVICE ====================
+
+const LoveSection = ({ lifePath }) => {
+    const advice = getLoveAdvice(lifePath);
+
+    return (
+        <Section icon={Heart} title="Любовь и Отношения">
+            <div className="space-y-3">
+                <div className="p-4 rounded-2xl bg-gradient-to-r from-pink-500/15 to-rose-500/10 border border-pink-500/30">
+                    <p className="text-[10px] uppercase tracking-wide text-pink-300 mb-1">Ваш стиль</p>
+                    <p className="text-[14px] font-semibold text-white">{advice.style}</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                    <div className="p-3 rounded-xl bg-white/5">
+                        <p className="text-[9px] uppercase text-emerald-400 mb-1">❤️ Даёте</p>
+                        <p className="text-[10px] text-white/70">{advice.gives}</p>
+                    </div>
+                    <div className="p-3 rounded-xl bg-white/5">
+                        <p className="text-[9px] uppercase text-cyan-400 mb-1">💙 Нужно</p>
+                        <p className="text-[10px] text-white/70">{advice.needs}</p>
+                    </div>
+                </div>
+
+                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20">
+                    <p className="text-[9px] uppercase text-amber-400 mb-1">⚠️ Вызовы</p>
+                    <p className="text-[10px] text-white/70">{advice.challenges}</p>
+                </div>
+
+                <div className="p-3 rounded-xl bg-purple-500/10 border border-purple-500/20">
+                    <p className="text-[9px] uppercase text-purple-400 mb-1">💡 Совет</p>
+                    <p className="text-[11px] text-white/80 italic">{advice.tips}</p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                    <span className="text-[10px] text-white/40">Лучшая совместимость:</span>
+                    <div className="flex gap-1.5">
+                        {advice.bestMatch.map(n => (
+                            <span key={n} className="px-2 py-1 rounded-lg bg-pink-500/20 text-pink-300 text-xs font-bold">{n}</span>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        </Section>
+    );
+};
+
+// ==================== FINANCIAL PROFILE ====================
+
+const FinanceSection = ({ lifePath, matrix }) => {
+    const profile = getFinancialProfile(lifePath, matrix);
+
+    return (
+        <Section icon={DollarSign} title="Финансовый Профиль">
+            <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-500/15 to-teal-500/10 border border-emerald-500/30 mb-3">
+                <p className="text-[10px] uppercase tracking-wide text-emerald-300 mb-1">Архетип</p>
+                <p className="text-[16px] font-semibold text-white">{profile.style}</p>
+            </div>
+
+            <div className="space-y-2">
+                <div className="p-3 rounded-xl bg-white/5 flex items-start gap-3">
+                    <span className="text-lg">💪</span>
+                    <div>
+                        <p className="text-[10px] uppercase text-white/40 mb-0.5">Сила</p>
+                        <p className="text-[11px] text-white/80">{profile.strength}</p>
+                    </div>
+                </div>
+
+                <div className="p-3 rounded-xl bg-white/5 flex items-start gap-3">
+                    <span className="text-lg">⚡</span>
+                    <div>
+                        <p className="text-[10px] uppercase text-white/40 mb-0.5">Слабость</p>
+                        <p className="text-[11px] text-white/80">{profile.weakness}</p>
+                    </div>
+                </div>
+
+                <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                    <p className="text-[11px] text-emerald-300">💡 {profile.advice}</p>
+                </div>
+
+                {profile.additions?.length > 0 && (
+                    <div className="mt-2 space-y-1">
+                        {profile.additions.map((a, i) => (
+                            <p key={i} className="text-[10px] text-white/50 pl-3 border-l border-emerald-500/30">{a}</p>
+                        ))}
+                    </div>
+                )}
+            </div>
+        </Section>
+    );
+};
+
+// ==================== SOUL MISSION ====================
+
+const SoulMissionSection = ({ lifePath, name }) => {
+    const expressionNum = calculateExpressionNumber(name);
+    const soulUrgeNum = calculateSoulUrgeNumber(name);
+    const mission = getSoulMission(lifePath, expressionNum, soulUrgeNum);
+
+    return (
+        <PremiumCard gradient className="relative overflow-hidden">
+            <div className="absolute -top-10 -right-10 w-32 h-32 bg-gradient-to-br from-purple-500/30 to-pink-500/20 rounded-full blur-3xl" />
+            <div className="relative z-10">
+                <div className="flex items-center gap-2 mb-4">
+                    <Sparkles className="text-yellow-400" size={18} />
+                    <span className="text-[11px] uppercase tracking-widest text-white/50 font-medium">Миссия Души</span>
+                </div>
+                <p className="text-[14px] text-white/90 leading-relaxed">{mission}</p>
+            </div>
+        </PremiumCard>
+    );
+};
+
+// ==================== COMPATIBILITY ====================
+
+const CompatibilitySection = ({ birthDate, onCalculate }) => {
+    const [partnerDate, setPartnerDate] = useState('');
+    const [result, setResult] = useState(null);
+    const [error, setError] = useState('');
+
+    const parseDate = (text) => {
+        const cleaned = text.replace(/[^\d./-]/g, '');
+        let day, month, year;
+        const match1 = cleaned.match(/^(\d{1,2})[./-](\d{1,2})[./-](\d{4})$/);
+        if (match1) [, day, month, year] = match1;
+        const match2 = cleaned.match(/^(\d{2})(\d{2})(\d{4})$/);
+        if (match2) [, day, month, year] = match2;
+        if (day && month && year) {
+            const d = parseInt(day), m = parseInt(month), y = parseInt(year);
+            if (d >= 1 && d <= 31 && m >= 1 && m <= 12 && y >= 1900 && y <= new Date().getFullYear()) {
+                return `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+            }
+        }
+        return null;
+    };
+
+    const handleCalculate = () => {
+        const parsed = parseDate(partnerDate);
+        if (!parsed) {
+            setError('Введите дату в формате ДД.ММ.ГГГГ');
+            return;
+        }
+        setError('');
+        const compatibility = calculateFullCompatibility(birthDate, parsed);
+        setResult(compatibility);
+    };
+
+    return (
+        <Section icon={Users} title="Совместимость">
+            <div className="space-y-4">
+                <div className="flex gap-2">
+                    <input
+                        type="text"
+                        value={partnerDate}
+                        onChange={(e) => setPartnerDate(e.target.value)}
+                        placeholder="Дата партнёра (ДД.ММ.ГГГГ)"
+                        className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-[13px] placeholder-white/30 focus:outline-none focus:border-purple-500/50"
+                    />
+                    <motion.button
+                        whileTap={{ scale: 0.95 }}
+                        onClick={handleCalculate}
+                        className="px-4 py-3 rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 text-white text-[12px] font-semibold"
+                    >
+                        Рассчитать
+                    </motion.button>
+                </div>
+
+                {error && <p className="text-red-400 text-[11px]">{error}</p>}
+
+                {result && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="space-y-3"
+                    >
+                        <div className="flex items-center justify-between p-4 rounded-2xl bg-gradient-to-r from-pink-500/20 to-rose-500/10 border border-pink-500/30">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-xl bg-pink-500/30 flex items-center justify-center">
+                                    <span className="text-2xl font-bold text-white">{result.person1.lifePath}</span>
+                                </div>
+                                <Heart className="text-pink-400" size={20} />
+                                <div className="w-12 h-12 rounded-xl bg-pink-500/30 flex items-center justify-center">
+                                    <span className="text-2xl font-bold text-white">{result.person2.lifePath}</span>
+                                </div>
+                            </div>
+                            <div className="text-right">
+                                <p className="text-3xl font-bold text-pink-300">{result.score}%</p>
+                                <p className="text-[10px] text-white/50">{result.analysis.level}</p>
+                            </div>
+                        </div>
+
+                        <p className="text-[12px] text-white/70">{result.analysis.summary}</p>
+
+                        <div className="grid grid-cols-1 gap-2">
+                            <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                                <p className="text-[9px] uppercase text-emerald-400 mb-1">💪 Сила союза</p>
+                                <p className="text-[11px] text-white/80">{result.analysis.strength}</p>
+                            </div>
+                            <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20">
+                                <p className="text-[9px] uppercase text-amber-400 mb-1">⚡ Вызов</p>
+                                <p className="text-[11px] text-white/80">{result.analysis.challenge}</p>
+                            </div>
+                            <div className="p-3 rounded-xl bg-purple-500/10 border border-purple-500/20">
+                                <p className="text-[9px] uppercase text-purple-400 mb-1">💡 Совет</p>
+                                <p className="text-[11px] text-white/80">{result.analysis.tip}</p>
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+            </div>
+        </Section>
+    );
+};
+
+// ==================== DAILY HOROSCOPE ====================
+
+const DailyHoroscopeSection = ({ birthDate }) => {
+    const horoscope = getDailyHoroscope(birthDate);
+
+    return (
+        <Section icon={Sun} title="Прогноз на Сегодня" badge="LIVE" defaultOpen={true}>
+            <div className="space-y-3">
+                <div className="flex items-center justify-between p-4 rounded-2xl bg-gradient-to-r from-amber-500/20 to-orange-500/10 border border-amber-500/30">
+                    <div>
+                        <p className="text-[10px] uppercase text-white/40">{horoscope.date.split('-').reverse().join('.')}</p>
+                        <p className="text-[16px] font-semibold text-white flex items-center gap-2">
+                            <span className="text-xl">{horoscope.energy}</span>
+                            {horoscope.theme}
+                        </p>
+                    </div>
+                    <div className="text-right">
+                        <p className="text-[10px] text-white/40">Персональный день</p>
+                        <p className="text-3xl font-bold" style={{ color: horoscope.color }}>{horoscope.personalDay}</p>
+                    </div>
+                </div>
+
+                <div className="space-y-2">
+                    <div className="p-3 rounded-xl bg-white/5">
+                        <p className="text-[9px] uppercase text-cyan-400 mb-1">🌅 Утро</p>
+                        <p className="text-[11px] text-white/70">{horoscope.morning}</p>
+                    </div>
+                    <div className="p-3 rounded-xl bg-white/5">
+                        <p className="text-[9px] uppercase text-yellow-400 mb-1">☀️ День</p>
+                        <p className="text-[11px] text-white/70">{horoscope.afternoon}</p>
+                    </div>
+                    <div className="p-3 rounded-xl bg-white/5">
+                        <p className="text-[9px] uppercase text-purple-400 mb-1">🌙 Вечер</p>
+                        <p className="text-[11px] text-white/70">{horoscope.evening}</p>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                    <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                        <p className="text-[9px] uppercase text-emerald-400 mb-1">✨ Возможность</p>
+                        <p className="text-[10px] text-white/70">{horoscope.opportunity}</p>
+                    </div>
+                    <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20">
+                        <p className="text-[9px] uppercase text-amber-400 mb-1">⚠️ Вызов</p>
+                        <p className="text-[10px] text-white/70">{horoscope.challenge}</p>
+                    </div>
+                </div>
+
+                <div className="p-3 rounded-xl bg-white/5">
+                    <p className="text-[9px] uppercase text-white/40 mb-2">⏰ Благоприятные часы</p>
+                    <div className="flex gap-2">
+                        {horoscope.luckyHours.map((h, i) => (
+                            <span key={i} className="px-2 py-1 rounded-lg bg-purple-500/20 text-purple-300 text-[10px] font-medium">{h}</span>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        </Section>
+    );
+};
+
+// ==================== MONTHLY HOROSCOPE ====================
+
+const MonthlyHoroscopeSection = ({ birthDate }) => {
+    const horoscope = getMonthlyHoroscope(birthDate);
+
+    return (
+        <Section icon={Moon} title={`Прогноз: ${horoscope.monthName}`}>
+            <div className="space-y-3">
+                <div className="p-4 rounded-2xl bg-gradient-to-r from-indigo-500/20 to-purple-500/10 border border-indigo-500/30">
+                    <div className="flex items-center justify-between mb-2">
+                        <p className="text-[10px] uppercase text-white/40">Персональный месяц</p>
+                        <span className="text-2xl font-bold" style={{ color: horoscope.color }}>{horoscope.personalMonth}</span>
+                    </div>
+                    <p className="text-[14px] font-semibold text-white flex items-center gap-2">
+                        <span className="text-lg">{horoscope.energy}</span>
+                        {horoscope.theme}
+                    </p>
+                </div>
+
+                <p className="text-[12px] text-white/70 italic">{horoscope.summary}</p>
+
+                <div className="p-3 rounded-xl bg-white/5">
+                    <p className="text-[9px] uppercase text-white/40 mb-2">🎯 Фокус месяца</p>
+                    <div className="flex flex-wrap gap-1.5">
+                        {horoscope.focus.map((f, i) => (
+                            <span key={i} className="px-2 py-1 rounded-lg bg-indigo-500/20 text-indigo-300 text-[10px]">{f}</span>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="p-3 rounded-xl bg-white/5">
+                    <p className="text-[9px] uppercase text-white/40 mb-2">📅 Недельные ритмы</p>
+                    <div className="space-y-1.5">
+                        {horoscope.weeks.map((w, i) => (
+                            <div key={i} className="flex items-center justify-between text-[10px]">
+                                <span className="text-white/50">{w.period} число</span>
+                                <span className="text-white/80 font-medium">{w.focus}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {horoscope.luckyDates.length > 0 && (
+                    <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                        <p className="text-[9px] uppercase text-emerald-400 mb-2">🍀 Удачные дни</p>
+                        <div className="flex flex-wrap gap-1.5">
+                            {horoscope.luckyDates.map((d, i) => (
+                                <span key={i} className="px-2 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">{d.day} {d.dayOfWeek}</span>
+                            ))}
+                        </div>
+                    </div>
+                )}
+            </div>
+        </Section>
+    );
+};
+
+// ==================== YEAR FORECAST ====================
+
+const YearForecastSection = ({ birthDate }) => {
+    const year = new Date().getFullYear();
+    const forecast = getYearForecast(birthDate, year);
+
+    return (
+        <Section icon={CalendarDays} title={`Прогноз на ${year} год`}>
+            <div className="space-y-3">
+                <div className="p-4 rounded-2xl bg-gradient-to-r from-cyan-500/20 to-blue-500/10 border border-cyan-500/30">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-[10px] uppercase text-white/40">Персональный год</p>
+                            <p className="text-[14px] font-semibold text-white flex items-center gap-2">
+                                <span className="text-lg">{forecast.yearTheme.energy}</span>
+                                {forecast.yearTheme.title}
+                            </p>
+                        </div>
+                        <div className="w-14 h-14 rounded-2xl bg-cyan-500/30 flex items-center justify-center">
+                            <span className="text-3xl font-bold text-white">{forecast.personalYear}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <p className="text-[11px] text-white/60">{forecast.yearTheme.desc}</p>
+
+                <div className="grid grid-cols-3 gap-2">
+                    {forecast.months.map((m, i) => (
+                        <motion.div
+                            key={i}
+                            whileHover={{ scale: 1.05 }}
+                            className="p-2 rounded-xl bg-white/5 text-center border border-white/5 hover:border-white/20 transition-all"
+                        >
+                            <p className="text-[9px] text-white/40">{m.name.slice(0, 3)}</p>
+                            <p className="text-lg font-bold text-white">{m.personalMonth}</p>
+                            <p className="text-[8px] text-white/50">{m.theme}</p>
+                        </motion.div>
+                    ))}
+                </div>
+            </div>
+        </Section>
+    );
+};
+
+// ==================== LUCKY DATES ====================
+
+const LuckyDatesSection = ({ birthDate }) => {
+    const now = new Date();
+    const dates = calculateLuckyDates(birthDate, now.getFullYear(), now.getMonth() + 1);
+    const excellent = dates.filter(d => d.rating >= 85).slice(0, 5);
+    const good = dates.filter(d => d.rating >= 70 && d.rating < 85).slice(0, 5);
+
+    return (
+        <Section icon={Calendar} title="Удачные Даты Месяца">
+            <div className="space-y-3">
+                {excellent.length > 0 && (
+                    <div>
+                        <p className="text-[10px] uppercase text-emerald-400 mb-2">⭐ Отличные дни</p>
+                        <div className="flex flex-wrap gap-2">
+                            {excellent.map((d, i) => (
+                                <motion.div
+                                    key={i}
+                                    whileHover={{ scale: 1.1 }}
+                                    className="w-12 h-14 rounded-xl bg-gradient-to-br from-emerald-500/30 to-teal-500/20 border border-emerald-500/30 flex flex-col items-center justify-center"
+                                >
+                                    <span className="text-lg font-bold text-white">{d.day}</span>
+                                    <span className="text-[8px] text-white/50">{d.dayOfWeek}</span>
+                                </motion.div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {good.length > 0 && (
+                    <div>
+                        <p className="text-[10px] uppercase text-cyan-400 mb-2">✓ Хорошие дни</p>
+                        <div className="flex flex-wrap gap-2">
+                            {good.map((d, i) => (
+                                <div
+                                    key={i}
+                                    className="w-10 h-12 rounded-lg bg-white/5 border border-white/10 flex flex-col items-center justify-center"
+                                >
+                                    <span className="text-sm font-bold text-white">{d.day}</span>
+                                    <span className="text-[7px] text-white/50">{d.dayOfWeek}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                <p className="text-[9px] text-white/40 italic">* Рейтинг основан на совместимости Персонального и Универсального дня</p>
+            </div>
+        </Section>
+    );
+};
+
+// ==================== CELL MODAL ====================
+
+const CellModal = ({ num, count, onClose }) => {
+    const m = getCellDetailedMeaning(num, count);
+    if (!m) return null;
+    return (
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/90 backdrop-blur-xl z-50 flex items-center justify-center p-6"
+            onClick={onClose}
+        >
+            <motion.div
+                initial={{ scale: 0.8, y: 40 }}
+                animate={{ scale: 1, y: 0 }}
+                exit={{ scale: 0.8, y: 40 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                className="w-full max-w-sm"
+                onClick={e => e.stopPropagation()}
+            >
+                <PremiumCard gradient>
+                    <div className="flex items-center gap-4 mb-5">
+                        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-xl shadow-purple-500/30">
+                            <span className="text-2xl font-bold text-white">{count > 0 ? num.toString().repeat(Math.min(count, 2)) : '—'}</span>
+                        </div>
+                        <div>
+                            <h3 className="text-xl font-bold text-white">{m.label}</h3>
+                            <p className="text-purple-300 text-sm font-medium">{m.title}</p>
+                        </div>
+                    </div>
+                    <p className="text-[13px] text-white/70 leading-relaxed mb-5">{m.text}</p>
+                    <button
+                        onClick={onClose}
+                        className="w-full py-3 rounded-2xl bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm font-semibold hover:shadow-lg hover:shadow-purple-500/30 transition-all"
+                    >
+                        Понятно
+                    </button>
+                </PremiumCard>
+            </motion.div>
+        </motion.div>
+    );
+};
+
+// ==================== MAIN DASHBOARD ====================
+
+const ResultDashboard = ({ data, onReset }) => {
+    const [selectedCell, setSelectedCell] = useState(null);
+
+    const lifePath = calculateLifePathNumber(data.birthDate);
+    const matrix = calculatePsychomatrix(data.birthDate);
+    const meaning = getLifePathMeaning(lifePath);
+    const details = getLifePathDetailed(lifePath);
+
+    return (
+        <div className="w-full h-full overflow-y-auto px-3 pb-10 space-y-4">
+
+            {/* Header */}
+            <header className="text-center py-5">
+                <motion.div
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-3"
+                >
+                    <Sparkles className="text-purple-400" size={14} />
+                    <span className="text-[11px] uppercase tracking-widest text-white/50 font-medium">Анализ завершён</span>
+                </motion.div>
+                <motion.h1
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                    className="text-3xl font-display font-bold bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent"
+                >
+                    {data.name}
+                </motion.h1>
+                <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                    className="text-white/40 text-[12px] mt-1"
+                >
+                    {data.birthDate.split('-').reverse().join('.')}
+                </motion.p>
+            </header>
+
+            <LifePathSection lifePath={lifePath} meaning={meaning} details={details} />
+            <BirthdaySection birthDate={data.birthDate} />
+            <PersonalCyclesSection birthDate={data.birthDate} />
+            <NameSection name={data.name} />
+
+            {/* Psychomatrix */}
+            <PremiumCard>
+                <div className="flex items-center gap-3 mb-4">
+                    <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-purple-500/30 to-pink-500/20 flex items-center justify-center border border-purple-500/20">
+                        <Grid3X3 size={16} className="text-purple-300" />
+                    </div>
+                    <span className="text-[14px] font-semibold text-white">Квадрат Пифагора</span>
+                    <span className="ml-auto text-[10px] text-white/30">tap для деталей</span>
+                </div>
+                <PsychomatrixGrid matrix={matrix} onCellClick={setSelectedCell} />
+            </PremiumCard>
+
+            <LinesSection matrix={matrix} />
+            <DestinyGraphSection dateString={data.birthDate} />
+
+            {/* === ПРОГНОЗЫ === */}
+            <DailyHoroscopeSection birthDate={data.birthDate} />
+            <MonthlyHoroscopeSection birthDate={data.birthDate} />
+            <YearForecastSection birthDate={data.birthDate} />
+            <LuckyDatesSection birthDate={data.birthDate} />
+            <CompatibilitySection birthDate={data.birthDate} />
+
+            {/* === АНАЛИЗ ЛИЧНОСТИ === */}
+            <PinnaclesSection birthDate={data.birthDate} />
+            <TransitionSection birthDate={data.birthDate} />
+            <KarmicSection matrix={matrix} />
+            <HealthSection matrix={matrix} />
+            <DevelopmentSection matrix={matrix} lifePath={lifePath} />
+            <ChallengesSection birthDate={data.birthDate} />
+            <HiddenPassionsSection name={data.name} />
+            <LoveSection lifePath={lifePath} />
+            <FinanceSection lifePath={lifePath} matrix={matrix} />
+            <LuckySection lifePath={lifePath} />
+            <AffirmationSection birthDate={data.birthDate} />
+            <SoulMissionSection lifePath={lifePath} name={data.name} />
+
+            {/* Reset */}
+            <div className="flex justify-center pt-6">
+                <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={onReset}
+                    className="flex items-center gap-2 px-8 py-4 rounded-2xl bg-gradient-to-r from-purple-500/20 to-pink-500/20 hover:from-purple-500/30 hover:to-pink-500/30 border border-white/10 text-white text-[14px] font-semibold transition-all shadow-lg shadow-purple-500/10"
+                >
+                    <RotateCcw size={16} />
+                    Новый анализ
+                </motion.button>
+            </div>
+
+            <AnimatePresence>
+                {selectedCell !== null && (
+                    <CellModal num={selectedCell} count={matrix[selectedCell]} onClose={() => setSelectedCell(null)} />
+                )}
+            </AnimatePresence>
+        </div>
+    );
+};
+
+export default ResultDashboard;
