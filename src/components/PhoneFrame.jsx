@@ -1,9 +1,39 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 const PhoneFrame = ({ children }) => {
+    const [isMobile, setIsMobile] = useState(false);
     const now = new Date();
     const timeStr = now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
 
+    useEffect(() => {
+        const checkMobile = () => {
+            // Определяем мобильное устройство по ширине экрана
+            setIsMobile(window.innerWidth < 768);
+        };
+
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
+    // На мобильных устройствах — показываем контент без рамки
+    if (isMobile) {
+        return (
+            <div className="min-h-screen w-full bg-gradient-to-b from-[#0a0a1a] via-[#0f0f2a] to-[#050510] relative overflow-hidden">
+                {/* Animated Background Orbs */}
+                <div className="floating-orb w-[300px] h-[300px] bg-purple-600 -top-24 -left-24" style={{ animationDelay: '0s' }} />
+                <div className="floating-orb w-[200px] h-[200px] bg-pink-500 top-1/2 -right-16" style={{ animationDelay: '2s' }} />
+                <div className="floating-orb w-[150px] h-[150px] bg-cyan-500 bottom-0 left-1/4" style={{ animationDelay: '4s' }} />
+
+                {/* Content */}
+                <div className="relative z-10 min-h-screen">
+                    {children}
+                </div>
+            </div>
+        );
+    }
+
+    // На десктопе — показываем с красивой рамкой телефона
     return (
         <div className="flex items-center justify-center min-h-screen p-4 sm:p-8 relative overflow-hidden">
 
