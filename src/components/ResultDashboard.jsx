@@ -56,7 +56,21 @@ const PremiumCard = ({ children, className = '', gradient = false, index = 0 }) 
     </motion.div>
 );
 
-const Section = ({ icon: Icon, title, badge, children, defaultOpen = false }) => {
+// Beginner help tooltip component
+const BeginnerHint = ({ text }) => (
+    <motion.div
+        initial={{ opacity: 0, y: -5 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mt-2 p-3 rounded-xl bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/20"
+    >
+        <div className="flex items-start gap-2">
+            <span className="text-lg">💡</span>
+            <p className="text-[11px] text-white/70 leading-relaxed">{text}</p>
+        </div>
+    </motion.div>
+);
+
+const Section = ({ icon: Icon, title, badge, children, defaultOpen = false, hint = null, isBeginner = false }) => {
     const [open, setOpen] = useState(defaultOpen);
     return (
         <PremiumCard>
@@ -70,6 +84,9 @@ const Section = ({ icon: Icon, title, badge, children, defaultOpen = false }) =>
                         <span className="px-1.5 sm:px-2 py-0.5 text-[8px] sm:text-[9px] font-semibold bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 text-emerald-300 rounded-full border border-emerald-500/30 animate-pulse flex-shrink-0">
                             {badge}
                         </span>
+                    )}
+                    {isBeginner && hint && (
+                        <span className="text-[9px] text-blue-400 flex-shrink-0">💡</span>
                     )}
                 </div>
                 <motion.div animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.3 }} className="flex-shrink-0 ml-2">
@@ -85,6 +102,7 @@ const Section = ({ icon: Icon, title, badge, children, defaultOpen = false }) =>
                         transition={{ duration: 0.3, ease: 'easeInOut' }}
                         className="overflow-hidden"
                     >
+                        {isBeginner && hint && <BeginnerHint text={hint} />}
                         <div className="mt-3 sm:mt-4 space-y-2.5 sm:space-y-3">{children}</div>
                     </motion.div>
                 )}
@@ -92,6 +110,23 @@ const Section = ({ icon: Icon, title, badge, children, defaultOpen = false }) =>
         </PremiumCard>
     );
 };
+
+// Hints dictionary for beginners
+const BEGINNER_HINTS = {
+    lifePath: "Число Жизненного Пути — это ваша главная миссия в этой жизни. Оно рассчитывается из суммы всех цифр вашей даты рождения и показывает, какие таланты и возможности вам даны от рождения.",
+    psychomatrix: "Психоматрица (Квадрат Пифагора) — это таблица 3x3, показывающая ваши врождённые качества. Каждая ячейка отвечает за определённую характеристику: энергию, логику, интуицию и т.д.",
+    lines: "Линии Психоматрицы — это дополнительные качества, которые возникают при сложении чисел по рядам, колонкам и диагоналям. Они показывают семью, удачу, талант и другие аспекты.",
+    destiny: "Граф Судьбы показывает, как ваша энергия будет меняться каждые 12 лет жизни. Это помогает понять свои лучшие периоды.",
+    biorhythm: "Биоритмы — это природные циклы вашего тела и разума. Физический (23 дня), эмоциональный (28 дней) и интеллектуальный (33 дней) циклы сменяют друг друга.",
+    pinnacles: "Вершины — это 4 больших этапа вашей жизни, каждый со своей темой и уроками. Они помогают понять, чего ожидать в разном возрасте.",
+    challenges: "Числа Испытаний показывают преплятствия, которые вам нужно преодолеть на каждом этапе жизни для личностного роста.",
+    karmic: "Кармические уроки — это качества, которых вам не хватает (отсутствующие числа в имени). Их развитие — ваша задача в этой жизни.",
+    compatibility: "Совместимость рассчитывается по Числам Жизненного Пути двух людей. Это показывает, насколько гармоничны будут отношения.",
+    planetary: "Каждое число связано с определённой планетой. Это влияет на ваш характер, благоприятные дни и даже камни-талисманы.",
+    tarot: "Каждое Число Жизненного Пути соответствует карте Таро из Старших Арканов. Это ваш архетип и основная энергия.",
+    horoscope: "Нумерологический прогноз рассчитывается на основе ваших Персональных чисел дня, месяца и года. Это цикличная система из 9 периодов."
+};
+
 
 // ==================== PSYCHOMATRIX ====================
 
@@ -1382,9 +1417,29 @@ const ResultDashboard = ({ data, onReset }) => {
     const matrix = calculatePsychomatrix(data.birthDate);
     const meaning = getLifePathMeaning(lifePath);
     const details = getLifePathDetailed(lifePath);
+    const isBeginner = data.isBeginner ?? false;
 
     return (
         <div className="w-full h-full overflow-y-auto overflow-x-hidden px-4 sm:px-5 pb-12 pt-4 space-y-4">
+
+            {/* Beginner Welcome */}
+            {isBeginner && (
+                <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="p-4 rounded-2xl bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/20"
+                >
+                    <div className="flex items-start gap-3">
+                        <span className="text-2xl">📚</span>
+                        <div>
+                            <p className="text-[13px] font-semibold text-white">Режим обучения включён</p>
+                            <p className="text-[11px] text-white/60 mt-1">
+                                Ищите значок 💡 — там будут пояснения для новичков. Нажимайте на секции, чтобы раскрыть детали.
+                            </p>
+                        </div>
+                    </div>
+                </motion.div>
+            )}
 
             {/* Header */}
             <header className="text-center py-4 sm:py-5">

@@ -101,7 +101,7 @@ const ChatInterface = ({ onComplete }) => {
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState('');
     const [step, setStep] = useState('init');
-    const [userData, setUserData] = useState({ name: '', birthDate: '' });
+    const [userData, setUserData] = useState({ name: '', birthDate: '', isBeginner: true });
     const [isTyping, setIsTyping] = useState(false);
     const [dateError, setDateError] = useState('');
     const [showHistory, setShowHistory] = useState(false);
@@ -124,14 +124,14 @@ const ChatInterface = ({ onComplete }) => {
         const greeting = getGreeting();
         const introMessages = [
             { text: greeting, delay: 400 },
-            { text: "Я — Нумеролог AI. Проведу глубокий анализ вашей личности по системе Пифагора. Это займёт всего минуту! ⚡", delay: 2500 },
-            { text: "Как я могу к вам обращаться?", delay: 5000 }
+            { text: "Я — Нумеролог AI. Проведу глубокий анализ вашей личности по древней системе Пифагора 🔮", delay: 2500 },
+            { text: "Скажите, вы уже знакомы с нумерологией?", delay: 5000 }
         ];
 
         introMessages.forEach((msg, i) => {
             setTimeout(() => {
                 setMessages(prev => [...prev, { id: `intro-${i}`, sender: 'ai', text: msg.text, typing: true }]);
-                if (i === introMessages.length - 1) setTimeout(() => setStep('name'), 500);
+                if (i === introMessages.length - 1) setTimeout(() => setStep('experience'), 500);
             }, msg.delay);
         });
     }, []);
@@ -145,6 +145,34 @@ const ChatInterface = ({ onComplete }) => {
             if (callback) setTimeout(callback, 100);
         }, 600);
     }, []);
+
+    // Handle experience level selection
+    const handleExperienceSelect = (isBeginner) => {
+        vibrate(10);
+        setUserData(prev => ({ ...prev, isBeginner }));
+        setMessages(prev => [...prev, {
+            id: `user-exp`,
+            sender: 'user',
+            text: isBeginner ? 'Я новичок в нумерологии' : 'Да, я знаком с нумерологией'
+        }]);
+        setStep('waiting');
+
+        if (isBeginner) {
+            addAiMessage("Отлично! Тогда я буду объяснять всё подробно 📚", () => {
+                addAiMessage("Нумерология — это древняя наука о числах. Каждое число несёт особую энергию и влияет на нашу жизнь. Вы получите полный анализ с пояснениями! ✨", () => {
+                    addAiMessage("Как я могу к вам обращаться?", () => {
+                        setStep('name');
+                    });
+                });
+            });
+        } else {
+            addAiMessage("Прекрасно! Тогда сразу к делу 🚀", () => {
+                addAiMessage("Как я могу к вам обращаться?", () => {
+                    setStep('name');
+                });
+            });
+        }
+    };
 
     const handleSend = () => {
         if (!input.trim() || isTyping) return;
@@ -167,9 +195,19 @@ const ChatInterface = ({ onComplete }) => {
             const reaction = reactions[Math.floor(Math.random() * reactions.length)];
 
             addAiMessage(reaction, () => {
-                addAiMessage("Теперь укажите дату рождения — это ключ к вашей Психоматрице. Формат: ДД.ММ.ГГГГ", () => {
-                    setStep('date');
-                });
+                if (userData.isBeginner) {
+                    addAiMessage("Теперь мне нужна ваша дата рождения. Почему? 🤔", () => {
+                        addAiMessage("Дата рождения — это ваш \"космический код\". Из неё мы рассчитаем Число Жизненного Пути, Психоматрицу и многое другое!", () => {
+                            addAiMessage("Укажите дату в формате ДД.ММ.ГГГГ", () => {
+                                setStep('date');
+                            });
+                        });
+                    });
+                } else {
+                    addAiMessage("Укажите дату рождения (ДД.ММ.ГГГГ)", () => {
+                        setStep('date');
+                    });
+                }
             });
         } else if (step === 'date') {
             const parsedDate = parseDate(value);
@@ -191,7 +229,11 @@ const ChatInterface = ({ onComplete }) => {
             saveToHistory(finalUserData);
 
             // Fun loading messages
-            const loadingPhrases = [
+            const loadingPhrases = userData.isBeginner ? [
+                "Начинаю анализ... Сейчас объясню, что означают ваши числа! 🔮",
+                "Рассчитываю вашу Психоматрицу... Это древняя система от Пифагора! ✨",
+                "Соединяю цифры даты рождения в единую картину... 💫"
+            ] : [
                 "Вижу интересный паттерн... 🔮",
                 "Соединяю числа судьбы... ✨",
                 "Расшифровываю ваш космический код... 💫"
@@ -209,10 +251,11 @@ const ChatInterface = ({ onComplete }) => {
     const handleHistorySelect = (item) => {
         vibrate(15);
         setShowHistory(false);
-        onComplete(item);
+        onComplete({ ...item, isBeginner: userData.isBeginner });
     };
 
     const showInput = step === 'name' || step === 'date';
+    const showExperienceButtons = step === 'experience';
 
     return (
         <div className="flex flex-col h-full w-full">
@@ -359,6 +402,37 @@ const ChatInterface = ({ onComplete }) => {
                 </AnimatePresence>
                 <div ref={scrollRef} />
             </div>
+
+            {/* Experience Level Buttons */}
+            {showExperienceButtons && (
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="p-4 border-t border-white/5"
+                >
+                    <p className="text-[11px] text-white/40 text-center mb-3">Выберите ваш уровень:</p>
+                    <div className="flex gap-3">
+                        <motion.button
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => handleExperienceSelect(true)}
+                            className="flex-1 p-4 rounded-2xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30 hover:border-purple-500/50 transition-colors"
+                        >
+                            <div className="text-2xl mb-2">🌱</div>
+                            <p className="text-[13px] font-semibold text-white">Я новичок</p>
+                            <p className="text-[10px] text-white/50 mt-1">Объясняйте всё подробно</p>
+                        </motion.button>
+                        <motion.button
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => handleExperienceSelect(false)}
+                            className="flex-1 p-4 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 hover:border-cyan-500/50 transition-colors"
+                        >
+                            <div className="text-2xl mb-2">⭐</div>
+                            <p className="text-[13px] font-semibold text-white">Знаю нумерологию</p>
+                            <p className="text-[10px] text-white/50 mt-1">Сразу к анализу</p>
+                        </motion.button>
+                    </div>
+                </motion.div>
+            )}
 
             {/* Input */}
             {showInput && (
