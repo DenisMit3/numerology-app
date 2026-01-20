@@ -1562,13 +1562,26 @@ const ResultDashboard = ({ data, onReset }) => {
             </div>
 
             {/* Support Author Button */}
-            <motion.a
-                href="https://t.me/RezidentMD"
-                target="_blank"
-                rel="noopener noreferrer"
+            <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="relative mt-4 flex items-center justify-center gap-3 w-full py-4 rounded-2xl bg-gradient-to-r from-amber-500/20 via-yellow-500/20 to-amber-500/20 hover:from-amber-500/30 hover:via-yellow-500/30 hover:to-amber-500/30 border border-yellow-500/30 overflow-hidden group"
+                onClick={async () => {
+                    try {
+                        const response = await fetch('/api/create-invoice', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' }
+                        });
+                        const data = await response.json();
+                        if (data.success && data.invoiceLink) {
+                            window.open(data.invoiceLink, '_blank');
+                        } else {
+                            window.open('https://t.me/Izoterikapro_bot?start=donate', '_blank');
+                        }
+                    } catch (error) {
+                        window.open('https://t.me/Izoterikapro_bot?start=donate', '_blank');
+                    }
+                }}
+                className="relative mt-4 flex items-center justify-center gap-3 w-full py-4 rounded-2xl bg-gradient-to-r from-amber-500/20 via-yellow-500/20 to-amber-500/20 hover:from-amber-500/30 hover:via-yellow-500/30 hover:to-amber-500/30 border border-yellow-500/30 overflow-hidden group cursor-pointer"
             >
                 {/* Animated stars background */}
                 <div className="absolute inset-0 opacity-30">
@@ -1612,7 +1625,7 @@ const ResultDashboard = ({ data, onReset }) => {
                 >
                     100 ⭐ Telegram Stars
                 </motion.span>
-            </motion.a>
+            </motion.button>
 
             {/* Footer */}
             <footer className="text-center pt-8 pb-4">
