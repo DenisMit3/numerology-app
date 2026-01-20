@@ -1263,18 +1263,54 @@ const ResultDashboard = ({ data, onReset }) => {
             <AffirmationSection birthDate={data.birthDate} />
             <SoulMissionSection lifePath={lifePath} name={data.name} />
 
-            {/* Reset */}
-            <div className="flex justify-center pt-6">
+            {/* Actions */}
+            <div className="flex flex-col sm:flex-row gap-3 justify-center pt-6">
+                {/* Share Button */}
+                <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => {
+                        const text = `✨ Моё Число Жизненного Пути: ${lifePath}\n🔮 ${meaning}\n\nУзнай свою судьбу:`;
+                        if (navigator.share) {
+                            navigator.share({
+                                title: 'Мой нумерологический анализ',
+                                text: text,
+                                url: window.location.href
+                            });
+                        } else {
+                            navigator.clipboard.writeText(text + ' ' + window.location.href);
+                            alert('Ссылка скопирована!');
+                        }
+                    }}
+                    className="flex items-center justify-center gap-2 px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl bg-gradient-to-r from-cyan-500/20 to-blue-500/20 hover:from-cyan-500/30 hover:to-blue-500/30 border border-white/10 text-white text-[13px] sm:text-[14px] font-semibold transition-all"
+                >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                    </svg>
+                    Поделиться
+                </motion.button>
+
+                {/* Reset Button */}
                 <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={onReset}
-                    className="flex items-center gap-2 px-8 py-4 rounded-2xl bg-gradient-to-r from-purple-500/20 to-pink-500/20 hover:from-purple-500/30 hover:to-pink-500/30 border border-white/10 text-white text-[14px] font-semibold transition-all shadow-lg shadow-purple-500/10"
+                    className="flex items-center justify-center gap-2 px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl bg-gradient-to-r from-purple-500/20 to-pink-500/20 hover:from-purple-500/30 hover:to-pink-500/30 border border-white/10 text-white text-[13px] sm:text-[14px] font-semibold transition-all shadow-lg shadow-purple-500/10"
                 >
                     <RotateCcw size={16} />
                     Новый анализ
                 </motion.button>
             </div>
+
+            {/* Footer */}
+            <footer className="text-center pt-8 pb-4">
+                <p className="text-white/20 text-[10px]">
+                    Нумеролог AI • 2026
+                </p>
+                <p className="text-white/10 text-[9px] mt-1">
+                    Анализ основан на классической нумерологии
+                </p>
+            </footer>
 
             <AnimatePresence>
                 {selectedCell !== null && (
@@ -1286,3 +1322,4 @@ const ResultDashboard = ({ data, onReset }) => {
 };
 
 export default ResultDashboard;
+
