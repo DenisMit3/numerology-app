@@ -1561,6 +1561,59 @@ const ResultDashboard = ({ data, onReset }) => {
                 </motion.button>
             </div>
 
+            {/* Support Author Button */}
+            <motion.a
+                href="https://t.me/RezidentMD"
+                target="_blank"
+                rel="noopener noreferrer"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="relative mt-4 flex items-center justify-center gap-3 w-full py-4 rounded-2xl bg-gradient-to-r from-amber-500/20 via-yellow-500/20 to-amber-500/20 hover:from-amber-500/30 hover:via-yellow-500/30 hover:to-amber-500/30 border border-yellow-500/30 overflow-hidden group"
+            >
+                {/* Animated stars background */}
+                <div className="absolute inset-0 opacity-30">
+                    {[...Array(6)].map((_, i) => (
+                        <motion.span
+                            key={i}
+                            animate={{
+                                y: [-20, 100],
+                                x: [0, Math.sin(i) * 20],
+                                opacity: [0, 1, 0],
+                            }}
+                            transition={{
+                                duration: 2 + i * 0.3,
+                                repeat: Infinity,
+                                delay: i * 0.4,
+                            }}
+                            className="absolute text-yellow-400"
+                            style={{ left: `${15 + i * 14}%`, top: '-10%' }}
+                        >
+                            ⭐
+                        </motion.span>
+                    ))}
+                </div>
+
+                {/* Telegram Star Icon */}
+                <div className="relative flex items-center gap-2">
+                    <svg className="w-5 h-5 text-yellow-400" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+                    </svg>
+                    <span className="text-[14px] font-semibold text-white">Поддержать автора</span>
+                    <svg className="w-5 h-5 text-yellow-400" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+                    </svg>
+                </div>
+
+                {/* Subtitle */}
+                <motion.span
+                    className="absolute bottom-1 text-[9px] text-yellow-400/70"
+                    animate={{ opacity: [0.5, 1, 0.5] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                >
+                    100 ⭐ Telegram Stars
+                </motion.span>
+            </motion.a>
+
             {/* Footer */}
             <footer className="text-center pt-8 pb-4">
                 <p className="text-white/20 text-[10px]">
