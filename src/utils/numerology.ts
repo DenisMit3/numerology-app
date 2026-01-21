@@ -1319,7 +1319,15 @@ export const getSoulMission = (lifePath, expressionNum, soulUrgeNum) => {
  * Отражает внутреннюю мотивацию и эмоциональную сущность
  */
 const calculateSoulNumber = (birthDate: string): number => {
-    const [, , day] = birthDate.split('-').map(Number);
+    // Дата в формате ГГГГ-ММ-ДД
+    const parts = birthDate.split('-');
+    if (parts.length !== 3) {
+        return 1; // fallback
+    }
+    const day = parseInt(parts[2], 10);
+    if (isNaN(day) || day < 1 || day > 31) {
+        return 1; // fallback
+    }
     return reduceToSingle(day);
 };
 
@@ -1338,9 +1346,24 @@ export const calculateFullCompatibility = (birthDate1: string, birthDate2: strin
     const soul1 = calculateSoulNumber(birthDate1);
     const soul2 = calculateSoulNumber(birthDate2);
 
-    // Психоматрицы для сравнения
-    const matrix1 = calculatePythagoreanMatrix(birthDate1);
-    const matrix2 = calculatePythagoreanMatrix(birthDate2);
+    // Простой расчёт матрицы из даты (считаем количество каждой цифры в дате)
+    const getSimpleMatrix = (date: string): { [key: number]: number } => {
+        const digits = date.replace(/\D/g, '');
+        const matrix: { [key: number]: number } = {};
+        for (let i = 1; i <= 9; i++) {
+            matrix[i] = 0;
+        }
+        for (const char of digits) {
+            const digit = parseInt(char, 10);
+            if (digit >= 1 && digit <= 9) {
+                matrix[digit]++;
+            }
+        }
+        return matrix;
+    };
+
+    const matrix1 = getSimpleMatrix(birthDate1);
+    const matrix2 = getSimpleMatrix(birthDate2);
 
     // Расчёт совместимости по Числам Жизненного Пути (основной показатель)
     const lifePathCompatibility = calculateLifePathCompatibility(lp1, lp2);
