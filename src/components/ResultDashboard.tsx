@@ -1453,6 +1453,7 @@ const ResultDashboard = ({ data, onReset }) => {
     const meaning = getLifePathMeaning(lifePath);
     const details = getLifePathDetailed(lifePath);
     const isBeginner = data.isBeginner ?? false;
+    const { toggleTheme, isDark } = useTheme();
 
     const content = (
         <div className="w-full h-full overflow-y-auto overflow-x-hidden px-4 sm:px-5 pb-12 pt-4 space-y-4">
@@ -1481,12 +1482,7 @@ const ResultDashboard = ({ data, onReset }) => {
                 {/* Theme Toggle */}
                 <motion.button
                     whileTap={{ scale: 0.9 }}
-                    onClick={() => {
-                        try {
-                            const { toggleTheme } = require('../App').useTheme?.() || {};
-                            if (toggleTheme) toggleTheme();
-                        } catch { }
-                    }}
+                    onClick={toggleTheme}
                     className="absolute top-4 right-4 p-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
                 >
                     <Palette size={16} className="text-white/50" />
