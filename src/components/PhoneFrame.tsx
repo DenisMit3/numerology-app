@@ -1,12 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, ReactNode } from 'react';
 
-const PhoneFrame = ({ children }) => {
-    const [isMobile, setIsMobile] = useState(false);
+interface PhoneFrameProps {
+    children: ReactNode;
+}
+
+const PhoneFrame: React.FC<PhoneFrameProps> = ({ children }) => {
+    const [isMobile, setIsMobile] = useState<boolean>(false);
     const now = new Date();
     const timeStr = now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
 
     useEffect(() => {
-        const checkMobile = () => {
+        const checkMobile = (): void => {
             // Определяем мобильное устройство по ширине экрана
             setIsMobile(window.innerWidth < 768);
         };

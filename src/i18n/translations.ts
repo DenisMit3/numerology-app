@@ -1,7 +1,9 @@
-// Internationalization (i18n) system
+// Internationalization (i18n) system - TypeScript version
 // Supports Russian (default) and English
 
-export const translations = {
+import type { Language, TranslationKeys, Translations } from '../types';
+
+export const translations: Translations = {
     ru: {
         // Chat
         greeting_morning: "Доброе утро! ☀️",
@@ -152,7 +154,7 @@ export const translations = {
 };
 
 // Get language from browser or Telegram
-export const detectLanguage = () => {
+export const detectLanguage = (): Language => {
     // Check Telegram WebApp
     if (typeof window !== 'undefined' && window.Telegram?.WebApp?.initDataUnsafe?.user?.language_code) {
         const tgLang = window.Telegram.WebApp.initDataUnsafe.user.language_code;
@@ -161,8 +163,8 @@ export const detectLanguage = () => {
 
     // Check localStorage
     if (typeof localStorage !== 'undefined') {
-        const saved = localStorage.getItem('numerology_lang');
-        if (saved && translations[saved]) return saved;
+        const saved = localStorage.getItem('numerology_lang') as Language | null;
+        if (saved && (saved === 'ru' || saved === 'en')) return saved;
     }
 
     // Check browser language
@@ -175,15 +177,15 @@ export const detectLanguage = () => {
 };
 
 // Save language preference
-export const setLanguage = (lang) => {
+export const setLanguage = (lang: Language): void => {
     if (typeof localStorage !== 'undefined') {
         localStorage.setItem('numerology_lang', lang);
     }
 };
 
-// Translation hook helper
-export const createT = (lang = 'ru') => {
-    const t = (key) => translations[lang]?.[key] || translations.ru[key] || key;
+// Translation function creator
+export const createT = (lang: Language = 'ru'): (key: string) => string => {
+    const t = (key: string): string => translations[lang]?.[key] || translations.ru[key] || key;
     return t;
 };
 

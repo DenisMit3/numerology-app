@@ -4,12 +4,33 @@
  */
 
 import { useEffect, useState, useCallback } from 'react';
+import type { TelegramWebApp, TelegramUser } from '../types';
 
-export const useTelegramWebApp = () => {
-    const [webApp, setWebApp] = useState(null);
-    const [user, setUser] = useState(null);
-    const [isReady, setIsReady] = useState(false);
-    const [isTelegram, setIsTelegram] = useState(false);
+type HapticType = 'impact' | 'notification' | 'selection';
+
+interface UseTelegramWebAppReturn {
+    webApp: TelegramWebApp | null;
+    user: TelegramUser | null;
+    isReady: boolean;
+    isTelegram: boolean;
+    close: () => void;
+    showMainButton: (text: string, onClick: () => void) => void;
+    hideMainButton: () => void;
+    hapticFeedback: (type?: HapticType) => void;
+    openInvoice: (invoiceUrl: string, callback?: (status: string) => void) => void;
+    sendData: (data: unknown) => void;
+    firstName: string | null;
+    lastName: string | null;
+    username: string | null;
+    languageCode: string;
+    isPremium: boolean;
+}
+
+export const useTelegramWebApp = (): UseTelegramWebAppReturn => {
+    const [webApp, setWebApp] = useState<TelegramWebApp | null>(null);
+    const [user, setUser] = useState<TelegramUser | null>(null);
+    const [isReady, setIsReady] = useState<boolean>(false);
+    const [isTelegram, setIsTelegram] = useState<boolean>(false);
 
     useEffect(() => {
         // Check if running inside Telegram
@@ -41,14 +62,14 @@ export const useTelegramWebApp = () => {
     }, []);
 
     // Close the Mini App
-    const close = useCallback(() => {
+    const close = useCallback((): void => {
         if (webApp) {
             webApp.close();
         }
     }, [webApp]);
 
     // Show main button
-    const showMainButton = useCallback((text, onClick) => {
+    const showMainButton = useCallback((text: string, onClick: () => void): void => {
         if (webApp?.MainButton) {
             webApp.MainButton.setText(text);
             webApp.MainButton.onClick(onClick);
@@ -57,14 +78,14 @@ export const useTelegramWebApp = () => {
     }, [webApp]);
 
     // Hide main button
-    const hideMainButton = useCallback(() => {
+    const hideMainButton = useCallback((): void => {
         if (webApp?.MainButton) {
             webApp.MainButton.hide();
         }
     }, [webApp]);
 
     // Haptic feedback
-    const hapticFeedback = useCallback((type = 'impact') => {
+    const hapticFeedback = useCallback((type: HapticType = 'impact'): void => {
         if (webApp?.HapticFeedback) {
             switch (type) {
                 case 'impact':
@@ -81,7 +102,7 @@ export const useTelegramWebApp = () => {
     }, [webApp]);
 
     // Open invoice
-    const openInvoice = useCallback((invoiceUrl, callback) => {
+    const openInvoice = useCallback((invoiceUrl: string, callback?: (status: string) => void): void => {
         if (webApp?.openInvoice) {
             webApp.openInvoice(invoiceUrl, callback);
         } else {
@@ -90,7 +111,7 @@ export const useTelegramWebApp = () => {
     }, [webApp]);
 
     // Send data to bot
-    const sendData = useCallback((data) => {
+    const sendData = useCallback((data: unknown): void => {
         if (webApp?.sendData) {
             webApp.sendData(JSON.stringify(data));
         }
