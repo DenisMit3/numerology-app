@@ -931,7 +931,9 @@ const CompatibilitySection = ({ birthDate, onCalculate }) => {
         }
     }, [partnerDate, birthDate]);
 
-    const handleCalculate = () => {
+    const handleCalculate = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
         const parsed = parseDate(partnerDate);
         if (!parsed) {
             setError('Введите дату в формате ДД.ММ.ГГГГ');
@@ -954,6 +956,7 @@ const CompatibilitySection = ({ birthDate, onCalculate }) => {
                         className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-[13px] placeholder-white/30 focus:outline-none focus:border-purple-500/50"
                     />
                     <motion.button
+                        type="button"
                         whileTap={{ scale: 0.95 }}
                         onClick={handleCalculate}
                         className="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 text-white text-[13px] font-semibold shadow-lg shadow-pink-500/20"
