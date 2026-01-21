@@ -1,4 +1,4 @@
-import React, { useState, useEffect, createContext, useContext } from 'react';
+import React, { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     calculatePsychomatrix, calculateLifePathNumber, getLifePathMeaning, getLifePathDetailed,
@@ -14,22 +14,42 @@ import {
     calculateFullCompatibility, getYearForecast, calculateLuckyDates,
     getDailyHoroscope, getMonthlyHoroscope,
     calculateBiorhythms, calculateKarmicDebt, getPlanetaryAssociation,
-    calculatePowerNumber, calculateMaturityNumber, getTarotConnection
+    calculatePowerNumber, calculateMaturityNumber, getTarotConnection,
+    Psychomatrix, LifePathDetails
 } from '../utils/numerology';
 import { useTheme } from '../App';
 import {
     RotateCcw, Sparkles, Grid3X3, TrendingUp, ChevronDown, HelpCircle,
     User, Calendar, Gem, Zap, AlertCircle, Mountain, Heart, Lightbulb, Star, Clock, Gift,
-    Flame, DollarSign, Target, Quote, Users, Sun, Moon, CalendarDays, Activity, Orbit, Palette
+    Flame, DollarSign, Target, Quote, Users, Sun, Moon, CalendarDays, Activity, Orbit, Palette,
+    LucideIcon
 } from 'lucide-react';
 
+// Types
+interface UserData {
+    name: string;
+    birthDate: string;
+    isBeginner?: boolean;
+}
+
+interface ResultDashboardProps {
+    data: UserData;
+    onReset: () => void;
+}
+
 // Context for beginner mode
-const BeginnerContext = createContext(false);
-const useIsBeginner = () => useContext(BeginnerContext);
+const BeginnerContext = createContext<boolean>(false);
+const useIsBeginner = (): boolean => useContext(BeginnerContext);
 
 // ==================== PREMIUM COMPONENTS ====================
 
-const GlowNumber = ({ number, size = 'lg', color = 'purple' }) => (
+interface GlowNumberProps {
+    number: number | string;
+    size?: 'lg' | 'md' | 'sm';
+    color?: string;
+}
+
+const GlowNumber: React.FC<GlowNumberProps> = ({ number, size = 'lg', color = 'purple' }) => (
     <div className="relative flex items-center justify-center">
         <div className={`absolute inset-0 bg-gradient-to-r from-${color}-500 to-pink-500 blur-2xl opacity-50 rounded-full scale-150`} />
         <span className={`relative z-10 font-display font-bold bg-gradient-to-br from-white via-${color}-200 to-pink-200 bg-clip-text text-transparent ${size === 'lg' ? 'text-6xl' : size === 'md' ? 'text-3xl' : 'text-xl'
@@ -39,7 +59,14 @@ const GlowNumber = ({ number, size = 'lg', color = 'purple' }) => (
     </div>
 );
 
-const PremiumCard = ({ children, className = '', gradient = false, index = 0 }) => (
+interface PremiumCardProps {
+    children: ReactNode;
+    className?: string;
+    gradient?: boolean;
+    index?: number;
+}
+
+const PremiumCard: React.FC<PremiumCardProps> = ({ children, className = '', gradient = false, index = 0 }) => (
     <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

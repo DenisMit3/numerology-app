@@ -1,33 +1,288 @@
 /**
  * ПРОФЕССИОНАЛЬНАЯ НУМЕРОЛОГИЧЕСКАЯ СИСТЕМА
- * Версия 2.0 — Расширенный контент
+ * Версия 2.0 — Расширенный контент (TypeScript)
  * Источники: А.Ф. Александров, Дэвид Филлипс, Харриш Джохари
  */
 
+// ==================== ТИПЫ ====================
+
+export interface Psychomatrix {
+    [key: number]: number;
+}
+
+export interface BirthdayMeaning {
+    title: string;
+    desc: string;
+}
+
+export interface KarmicLessonMeaning {
+    lesson: string;
+    desc: string;
+    how: string;
+}
+
+export interface Pinnacle {
+    period: number;
+    ages: string;
+    number: number;
+    title: string;
+}
+
+export interface TransitionAge {
+    age: number;
+    title: string;
+    desc: string;
+}
+
+export interface NameNumberMeaning {
+    title: string;
+    desc: string;
+}
+
+export interface PersonalCycleMeaning {
+    title: string;
+    energy: string;
+    color: string;
+    desc: string;
+    advice: string;
+}
+
+export interface LuckyElements {
+    numbers: number[];
+    colors: string[];
+    days: string[];
+    stones: string[];
+}
+
+export interface LineMeaning {
+    name: string;
+    icon: string;
+    value: number;
+    max?: number;
+    title?: string;
+    desc?: string;
+}
+
+export interface CellInfo {
+    label: string;
+    desc: string;
+}
+
+export interface DestinyGraphPoint {
+    year: number;
+    age: number;
+    destiny: number;
+    will: number;
+}
+
+export interface LifePathDetails {
+    mission: string;
+    strengths: string[];
+    challenges: string[];
+    careers: string[];
+    advice: string;
+}
+
+export interface CompatibilityResult {
+    score: number;
+    level: string;
+    desc: string;
+}
+
+export interface HealthRecommendation {
+    area: string;
+    status: string;
+    advice: string;
+}
+
+export interface DevelopmentAdvice {
+    type: 'develop' | 'use';
+    text: string;
+}
+
+export interface ChallengeNumber {
+    period: string;
+    number: number;
+}
+
+export interface ChallengeMeaning {
+    title: string;
+    desc: string;
+    advice: string;
+}
+
+export interface HiddenPassion {
+    number: number;
+    count: number;
+    meaning: string;
+}
+
+export interface DailyAffirmation {
+    affirmation: string;
+    meditation: string;
+}
+
+export interface LoveAdvice {
+    style: string;
+    strengths: string[];
+    challenges: string[];
+    idealPartners: number[];
+    advice: string;
+}
+
+export interface FinancialProfile {
+    type: string;
+    strengths: string[];
+    weaknesses: string[];
+    advice: string;
+}
+
+export interface SoulMission {
+    mission: string;
+    purpose: string;
+    gifts: string[];
+    challenges: string[];
+}
+
+export interface FullCompatibility {
+    lifePath1: number;
+    lifePath2: number;
+    score: number;
+    analysis: CompatibilityAnalysis;
+}
+
+export interface CompatibilityAnalysis {
+    level: string;
+    summary: string;
+    strength: string;
+    challenge: string;
+}
+
+export interface YearForecastMonth {
+    month: number;
+    monthName: string;
+    personalMonth: number;
+    theme: string;
+    energy: string;
+    advice: string;
+}
+
+export interface LuckyDate {
+    date: number;
+    day: string;
+    rating: number;
+    reason: string;
+    activities: string[];
+}
+
+export interface DailyHoroscope {
+    personalDay: number;
+    universalDay: number;
+    energy: string;
+    theme: string;
+    advice: string;
+    luckyHours: string[];
+    compatibility: number[];
+    morning: string;
+    afternoon: string;
+    evening: string;
+}
+
+export interface MonthlyHoroscope {
+    personalMonth: number;
+    personalYear: number;
+    theme: string;
+    weeks: string[];
+    summary: string;
+    luckyDays: number[];
+    challengeDays: number[];
+}
+
+export interface Biorhythms {
+    physical: number;
+    emotional: number;
+    intellectual: number;
+    average: number;
+    daysSinceBirth: number;
+    advice: string;
+}
+
+export interface KarmicDebt {
+    number: number;
+    source: string;
+    name: string;
+    karma: string;
+    lesson: string;
+    challenge: string;
+    advice: string;
+}
+
+export interface AngelNumberMeaning {
+    message: string;
+    guidance: string;
+}
+
+export interface PlanetaryAssociation {
+    planet: string;
+    symbol: string;
+    energy: string;
+    day: string;
+    color: string;
+    metal: string;
+    gem: string;
+    bodyPart: string;
+    advice: string;
+}
+
+export interface PowerNumber {
+    number: number;
+    meaning: string;
+    advice: string;
+}
+
+export interface MaturityNumber {
+    number: number;
+    meaning: string;
+    activationAge: string;
+}
+
+export interface SubtractiveConflict {
+    pair: string;
+    difference: number;
+    conflict: string;
+    resolution: string;
+}
+
+export interface TarotConnection {
+    card: string;
+    meaning: string;
+    arcana: string;
+}
+
 // ==================== АЛФАВИТ ====================
 
-const cyrillicToNumber = {
+const cyrillicToNumber: Record<string, number> = {
     'а': 1, 'б': 2, 'в': 3, 'г': 4, 'д': 5, 'е': 6, 'ё': 7, 'ж': 8, 'з': 9,
     'и': 1, 'й': 2, 'к': 3, 'л': 4, 'м': 5, 'н': 6, 'о': 7, 'п': 8, 'р': 9,
     'с': 1, 'т': 2, 'у': 3, 'ф': 4, 'х': 5, 'ц': 6, 'ч': 7, 'ш': 8, 'щ': 9,
     'ъ': 1, 'ы': 2, 'ь': 3, 'э': 4, 'ю': 5, 'я': 6
 };
 
-const vowels = ['а', 'е', 'ё', 'и', 'о', 'у', 'ы', 'э', 'ю', 'я'];
-const consonants = ['б', 'в', 'г', 'д', 'ж', 'з', 'й', 'к', 'л', 'м', 'н', 'п', 'р', 'с', 'т', 'ф', 'х', 'ц', 'ч', 'ш', 'щ'];
+const vowels: string[] = ['а', 'е', 'ё', 'и', 'о', 'у', 'ы', 'э', 'ю', 'я'];
+const consonants: string[] = ['б', 'в', 'г', 'д', 'ж', 'з', 'й', 'к', 'л', 'м', 'н', 'п', 'р', 'с', 'т', 'ф', 'х', 'ц', 'ч', 'ш', 'щ'];
 
-const reduceToSingle = (num) => {
+const reduceToSingle = (num: number): number => {
     while (num > 9 && num !== 11 && num !== 22 && num !== 33) {
         num = num.toString().split('').reduce((a, b) => a + parseInt(b), 0);
     }
     return num;
 };
 
-const getLetterValue = (letter) => cyrillicToNumber[letter.toLowerCase()] || 0;
+const getLetterValue = (letter: string): number => cyrillicToNumber[letter.toLowerCase()] || 0;
 
 // ==================== БАЗОВЫЕ РАСЧЁТЫ ====================
 
-export const calculateLifePathNumber = (dateString) => {
+export const calculateLifePathNumber = (dateString: string): number | null => {
     if (!dateString) return null;
     const digits = dateString.replace(/\D/g, '').split('').map(Number);
     let sum = digits.reduce((a, b) => a + b, 0);
