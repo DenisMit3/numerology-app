@@ -16,10 +16,11 @@ import {
     calculateBiorhythms, calculateKarmicDebt, getPlanetaryAssociation,
     calculatePowerNumber, calculateMaturityNumber, getTarotConnection
 } from '../utils/numerology';
+import { useTheme } from '../App';
 import {
     RotateCcw, Sparkles, Grid3X3, TrendingUp, ChevronDown, HelpCircle,
     User, Calendar, Gem, Zap, AlertCircle, Mountain, Heart, Lightbulb, Star, Clock, Gift,
-    Flame, DollarSign, Target, Quote, Users, Sun, Moon, CalendarDays, Activity, Orbit
+    Flame, DollarSign, Target, Quote, Users, Sun, Moon, CalendarDays, Activity, Orbit, Palette
 } from 'lucide-react';
 
 // Context for beginner mode
@@ -1449,7 +1450,21 @@ const ResultDashboard = ({ data, onReset }) => {
             )}
 
             {/* Header */}
-            <header className="text-center py-4 sm:py-5">
+            <header className="text-center py-4 sm:py-5 relative">
+                {/* Theme Toggle */}
+                <motion.button
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => {
+                        try {
+                            const { toggleTheme } = require('../App').useTheme?.() || {};
+                            if (toggleTheme) toggleTheme();
+                        } catch { }
+                    }}
+                    className="absolute top-4 right-4 p-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
+                >
+                    <Palette size={16} className="text-white/50" />
+                </motion.button>
+
                 <motion.div
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -1642,7 +1657,7 @@ const ResultDashboard = ({ data, onReset }) => {
                     <CellModal num={selectedCell} count={matrix[selectedCell]} onClose={() => setSelectedCell(null)} />
                 )}
             </AnimatePresence>
-        </div>
+        </div >
     );
 
     // Wrap everything in BeginnerContext
