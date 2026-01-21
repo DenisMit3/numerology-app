@@ -912,6 +912,25 @@ const CompatibilitySection = ({ birthDate, onCalculate }) => {
         return null;
     };
 
+    // Автоматический пересчёт при изменении даты партнёра
+    useEffect(() => {
+        if (!partnerDate) {
+            setResult(null);
+            setError('');
+            return;
+        }
+        const parsed = parseDate(partnerDate);
+        if (parsed) {
+            setError('');
+            const compatibility = calculateFullCompatibility(birthDate, parsed);
+            setResult(compatibility);
+        } else if (partnerDate.length >= 8) {
+            // Показываем ошибку только если введено достаточно символов
+            setError('Введите дату в формате ДД.ММ.ГГГГ');
+            setResult(null);
+        }
+    }, [partnerDate, birthDate]);
+
     const handleCalculate = () => {
         const parsed = parseDate(partnerDate);
         if (!parsed) {
