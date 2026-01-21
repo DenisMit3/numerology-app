@@ -242,3 +242,132 @@
     box-shadow: 0 0 40px rgba(139, 92, 246, 0.6), 0 0 60px rgba(236, 72, 153, 0.3);
   }
 }
+
+/* ==================== RESPONSIVE STYLES ==================== */
+
+/* Extra small screens (320px and below) */
+@media (max-width: 359px) {
+  html {
+    font-size: 14px;
+  }
+
+  .glass-card {
+    padding: 12px !important;
+    border-radius: 16px !important;
+  }
+
+  /* Smaller text on tiny screens */
+  h1 {
+    font-size: 1.5rem !important;
+  }
+
+  h2,
+  h3 {
+    font-size: 1rem !important;
+  }
+
+  /* Compact padding */
+  .px-4 {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+
+  /* Smaller buttons */
+  button {
+    min-height: 40px !important;
+    padding: 8px 12px !important;
+    font-size: 12px !important;
+  }
+
+  /* Smaller icons */
+  svg {
+    width: 14px !important;
+    height: 14px !important;
+  }
+
+  /* Compact grid */
+  .grid-cols-3 {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 4px !important;
+  }
+
+  /* Smaller number displays */
+  .text-6xl {
+    font-size: 2.5rem !important;
+  }
+
+  .text-3xl {
+    font-size: 1.5rem !important;
+  }
+
+  .text-2xl {
+    font-size: 1.25rem !important;
+  }
+}
+
+/* Small screens (360-400px) */
+@media (min-width: 360px) and (max-width: 400px) {
+  html {
+    font-size: 15px;
+  }
+
+  .glass-card {
+    padding: 14px !important;
+  }
+}
+
+/* Landscape mode on phones */
+@media (max-height: 500px) and (orientation: landscape) {
+  .py-4 {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+  }
+
+  .space-y-4>*+* {
+    margin-top: 0.5rem !important;
+  }
+}
+
+/* Light theme overrides */
+.light-theme {
+  --gradient-cosmic: linear-gradient(135deg, #f5f7fa 0%, #e4e9f0 50%, #f5f7fa 100%);
+}
+
+.light-theme .glass-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.6) 100%);
+  border-color: rgba(139, 92, 246, 0.2);
+  color: #1a1a2e;
+}
+
+.light-theme .text-white {
+  color: #1a1a2e !important;
+}
+
+.light-theme .text-white\/50,
+.light-theme .text-white\/60,
+.light-theme .text-white\/70,
+.light-theme .text-white\/80 {
+  color: rgba(26, 26, 46, 0.7) !important;
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Print styles */
+@media print {
+  body {
+    background: white !important;
+  }
+
+  .glass-card {
+    background: white !important;
+    border: 1px solid #ddd !important;
+    box-shadow: none !important;
+  }
+}
