@@ -1,18 +1,40 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, KeyboardEvent, ChangeEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, Sparkles, Zap, History, ChevronRight } from 'lucide-react';
+import type { UserData, ChatInterfaceProps } from '../types';
+
+// Types
+type ChatStep = 'init' | 'experience' | 'name' | 'date' | 'waiting' | 'calculating';
+
+interface Message {
+    id: string;
+    sender: 'user' | 'ai';
+    text?: string;
+    typing?: boolean;
+    calculating?: boolean;
+}
+
+interface HistoryItem extends UserData {
+    timestamp: number;
+}
+
+interface TypingTextProps {
+    text: string;
+    speed?: number;
+    onComplete?: () => void;
+}
 
 // Haptic feedback
-const vibrate = (pattern = 10) => {
+const vibrate = (pattern: number | number[] = 10): void => {
     if (navigator.vibrate) {
         navigator.vibrate(pattern);
     }
 };
 
 // Typing effect component
-const TypingText = ({ text, speed = 15, onComplete }) => {
-    const [displayed, setDisplayed] = useState('');
-    const completedRef = useRef(false);
+const TypingText: React.FC<TypingTextProps> = ({ text, speed = 15, onComplete }) => {
+    const [displayed, setDisplayed] = useState<string>('');
+    const completedRef = useRef<boolean>(false);
 
     useEffect(() => {
         if (displayed.length < text.length) {
@@ -41,9 +63,9 @@ const TypingText = ({ text, speed = 15, onComplete }) => {
 };
 
 // Date parser
-const parseDate = (text) => {
+const parseDate = (text: string): string | null => {
     const cleaned = text.replace(/[^\d./-]/g, '');
-    let day, month, year;
+    let day: string | undefined, month: string | undefined, year: string | undefined;
 
     const match1 = cleaned.match(/^(\d{1,2})[./-](\d{1,2})[./-](\d{4})$/);
     if (match1) [, day, month, year] = match1;
@@ -65,7 +87,8 @@ const parseDate = (text) => {
 
 // Get saved history
 const HISTORY_KEY = 'numerology_history';
-const getHistory = () => {
+
+const getHistory = (): HistoryItem[] => {
     try {
         return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
     } catch {
@@ -73,14 +96,15 @@ const getHistory = () => {
     }
 };
 
-const saveToHistory = (data) => {
+const saveToHistory = (data: UserData): void => {
     try {
         const history = getHistory();
         const exists = history.findIndex(h => h.name === data.name && h.birthDate === data.birthDate);
         if (exists >= 0) {
             history.splice(exists, 1);
         }
-        history.unshift({ ...data, timestamp: Date.now() });
+        const newItem: HistoryItem = { ...data, timestamp: Date.now() };
+        history.unshift(newItem);
         localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, 10)));
     } catch {
         console.log('Could not save to history');
@@ -88,7 +112,7 @@ const saveToHistory = (data) => {
 };
 
 // Personalized greetings based on time
-const getGreeting = () => {
+const getGreeting = (): string => {
     const hour = new Date().getHours();
     if (hour < 6) return "Не спится? 🌙 Самое время узнать свою судьбу";
     if (hour < 12) return "Доброе утро! ☀️ Готовы узнать свой код судьбы?";
@@ -97,17 +121,17 @@ const getGreeting = () => {
     return "Доброй ночи! 🌙 Числа никогда не спят";
 };
 
-const ChatInterface = ({ onComplete }) => {
-    const [messages, setMessages] = useState([]);
-    const [input, setInput] = useState('');
-    const [step, setStep] = useState('init');
-    const [userData, setUserData] = useState({ name: '', birthDate: '', isBeginner: true });
-    const [isTyping, setIsTyping] = useState(false);
-    const [dateError, setDateError] = useState('');
-    const [showHistory, setShowHistory] = useState(false);
-    const [history, setHistory] = useState([]);
-    const scrollRef = useRef(null);
-    const initRef = useRef(false);
+const ChatInterface: React.FC<ChatInterfaceProps> = ({ onComplete }) => {
+    const [messages, setMessages] = useState<Message[]>([]);
+    const [input, setInput] = useState<string>('');
+    const [step, setStep] = useState<ChatStep>('init');
+    const [userData, setUserData] = useState<UserData>({ name: '', birthDate: '', isBeginner: true });
+    const [isTyping, setIsTyping] = useState<boolean>(false);
+    const [dateError, setDateError] = useState<string>('');
+    const [showHistory, setShowHistory] = useState<boolean>(false);
+    const [history, setHistory] = useState<HistoryItem[]>([]);
+    const scrollRef = useRef<HTMLDivElement>(null);
+    const initRef = useRef<boolean>(false);
 
     useEffect(() => {
         scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -136,7 +160,7 @@ const ChatInterface = ({ onComplete }) => {
         });
     }, []);
 
-    const addAiMessage = useCallback((text, callback) => {
+    const addAiMessage = useCallback((text: string, callback?: () => void): void => {
         setIsTyping(true);
         vibrate(5);
         setTimeout(() => {
@@ -147,7 +171,7 @@ const ChatInterface = ({ onComplete }) => {
     }, []);
 
     // Handle experience level selection
-    const handleExperienceSelect = (isBeginner) => {
+    const handleExperienceSelect = (isBeginner: boolean): void => {
         vibrate(10);
         setUserData(prev => ({ ...prev, isBeginner }));
         setMessages(prev => [...prev, {
@@ -174,7 +198,7 @@ const ChatInterface = ({ onComplete }) => {
         }
     };
 
-    const handleSend = () => {
+    const handleSend = (): void => {
         if (!input.trim() || isTyping) return;
         const value = input.trim();
         vibrate(10);
@@ -223,7 +247,7 @@ const ChatInterface = ({ onComplete }) => {
             setStep('calculating');
             setDateError('');
 
-            const finalUserData = { ...userData, birthDate: parsedDate };
+            const finalUserData: UserData = { ...userData, birthDate: parsedDate };
 
             // Save to history
             saveToHistory(finalUserData);
@@ -248,10 +272,18 @@ const ChatInterface = ({ onComplete }) => {
         }
     };
 
-    const handleHistorySelect = (item) => {
+    const handleHistorySelect = (item: HistoryItem): void => {
         vibrate(15);
         setShowHistory(false);
         onComplete({ ...item, isBeginner: userData.isBeginner });
+    };
+
+    const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>): void => {
+        if (e.key === 'Enter') handleSend();
+    };
+
+    const handleInputChange = (e: ChangeEvent<HTMLInputElement>): void => {
+        setInput(e.target.value);
     };
 
     const showInput = step === 'name' || step === 'date';
@@ -393,7 +425,7 @@ const ChatInterface = ({ onComplete }) => {
                                         }`}
                                 >
                                     <p className="text-[13px] leading-relaxed">
-                                        {msg.typing && msg.sender === 'ai' ? <TypingText text={msg.text} /> : msg.text}
+                                        {msg.typing && msg.sender === 'ai' ? <TypingText text={msg.text || ''} /> : msg.text}
                                     </p>
                                 </motion.div>
                             )}
@@ -449,8 +481,8 @@ const ChatInterface = ({ onComplete }) => {
                             <input
                                 type="text"
                                 value={input}
-                                onChange={(e) => setInput(e.target.value)}
-                                onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                                onChange={handleInputChange}
+                                onKeyDown={handleKeyDown}
                                 placeholder={step === 'name' ? 'Ваше имя...' : 'ДД.ММ.ГГГГ'}
                                 disabled={isTyping}
                                 autoFocus
