@@ -919,13 +919,26 @@ const CompatibilitySection = ({ birthDate, onCalculate }) => {
             setError('');
             return;
         }
+
+        // Проверяем, что введена полная дата (минимум 10 символов: ДД.ММ.ГГГГ)
+        if (partnerDate.length < 10) {
+            // Дата ещё вводится, не делаем ничего
+            return;
+        }
+
         const parsed = parseDate(partnerDate);
         if (parsed) {
-            setError('');
-            const compatibility = calculateFullCompatibility(birthDate, parsed);
-            setResult(compatibility);
-        } else if (partnerDate.length >= 8) {
-            // Показываем ошибку только если введено достаточно символов
+            try {
+                setError('');
+                const compatibility = calculateFullCompatibility(birthDate, parsed);
+                setResult(compatibility);
+            } catch (err) {
+                console.error('Ошибка расчёта совместимости:', err);
+                setError('Ошибка расчёта. Проверьте дату.');
+                setResult(null);
+            }
+        } else {
+            // Показываем ошибку только если дата полная, но неверная
             setError('Введите дату в формате ДД.ММ.ГГГГ');
             setResult(null);
         }
@@ -939,9 +952,15 @@ const CompatibilitySection = ({ birthDate, onCalculate }) => {
             setError('Введите дату в формате ДД.ММ.ГГГГ');
             return;
         }
-        setError('');
-        const compatibility = calculateFullCompatibility(birthDate, parsed);
-        setResult(compatibility);
+        try {
+            setError('');
+            const compatibility = calculateFullCompatibility(birthDate, parsed);
+            setResult(compatibility);
+        } catch (err) {
+            console.error('Ошибка расчёта совместимости:', err);
+            setError('Ошибка расчёта. Проверьте даты.');
+            setResult(null);
+        }
     };
 
     return (
