@@ -988,6 +988,7 @@ const CompatibilitySection = ({ birthDate, onCalculate }) => {
 
                 {result && (
                     <motion.div
+                        key={`${result.person1.lifePath}-${result.person2.lifePath}-${result.score}-${partnerDate}`}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         className="space-y-3"
