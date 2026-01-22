@@ -334,20 +334,101 @@
 }
 
 .light-theme .glass-card {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.6) 100%);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
   border-color: rgba(139, 92, 246, 0.2);
   color: #1a1a2e;
+  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.1), 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
+/* Text colors in light theme */
 .light-theme .text-white {
   color: #1a1a2e !important;
 }
 
+.light-theme .text-white\/30,
+.light-theme .text-white\/40 {
+  color: rgba(26, 26, 46, 0.5) !important;
+}
+
 .light-theme .text-white\/50,
-.light-theme .text-white\/60,
+.light-theme .text-white\/60 {
+  color: rgba(26, 26, 46, 0.65) !important;
+}
+
 .light-theme .text-white\/70,
 .light-theme .text-white\/80 {
-  color: rgba(26, 26, 46, 0.7) !important;
+  color: rgba(26, 26, 46, 0.8) !important;
+}
+
+/* Backgrounds in light theme */
+.light-theme .bg-white\/5,
+.light-theme .bg-white\/10 {
+  background-color: rgba(139, 92, 246, 0.08) !important;
+}
+
+.light-theme .bg-white\/\[0\.02\],
+.light-theme .bg-white\/\[0\.03\],
+.light-theme .bg-white\/\[0\.05\],
+.light-theme .bg-white\/\[0\.08\] {
+  background-color: rgba(139, 92, 246, 0.06) !important;
+}
+
+/* Borders in light theme */
+.light-theme .border-white\/5,
+.light-theme .border-white\/10,
+.light-theme .border-white\/20 {
+  border-color: rgba(139, 92, 246, 0.2) !important;
+}
+
+/* Cards with gradient backgrounds */
+.light-theme [class*="from-white/"] {
+  background: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Input fields */
+.light-theme input,
+.light-theme textarea {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  color: #1a1a2e !important;
+  border-color: rgba(139, 92, 246, 0.3) !important;
+}
+
+.light-theme input::placeholder,
+.light-theme textarea::placeholder {
+  color: rgba(26, 26, 46, 0.4) !important;
+}
+
+/* Purple text adjustments */
+.light-theme .text-purple-400 {
+  color: #7c3aed !important;
+}
+
+.light-theme .text-purple-300 {
+  color: #8b5cf6 !important;
+}
+
+/* Pink text adjustments */
+.light-theme .text-pink-400,
+.light-theme .text-pink-300 {
+  color: #db2777 !important;
+}
+
+/* Gradient text remains vibrant */
+.light-theme .bg-gradient-to-r.from-white {
+  background: linear-gradient(to right, #7c3aed, #a855f7, #ec4899) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+/* Scrollbar in light theme */
+.light-theme ::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #a78bfa 0%, #f472b6 100%);
+}
+
+/* Selection in light theme */
+.light-theme ::selection {
+  background: rgba(139, 92, 246, 0.3);
+  color: #1a1a2e;
 }
 
 /* Reduce motion for accessibility */

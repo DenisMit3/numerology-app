@@ -1468,7 +1468,7 @@ const ResultDashboard = ({ data, onReset }) => {
     const { toggleTheme, isDark } = useTheme();
 
     const content = (
-        <div className="w-full h-full overflow-y-auto overflow-x-hidden px-4 sm:px-5 pb-12 pt-4 space-y-4">
+        <div className={`w-full h-full overflow-y-auto overflow-x-hidden px-4 sm:px-5 pb-12 pt-4 space-y-4 transition-colors duration-300 ${isDark ? 'bg-transparent' : 'bg-gradient-to-br from-purple-50/80 to-pink-50/80'}`}>
 
             {/* Beginner Welcome */}
             {isBeginner && (

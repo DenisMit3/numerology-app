@@ -104,7 +104,7 @@ function App(): React.ReactElement {
 
     return (
         <ThemeContext.Provider value={themeContextValue}>
-            <div className={`min-h-screen ${bgClass} overflow-auto transition-colors duration-300`}>
+            <div className={`min-h-screen ${bgClass} overflow-auto transition-colors duration-300 ${!isDark ? 'light-theme' : ''}`}>
                 {/* Background Ambience */}
                 <div className="fixed inset-0 pointer-events-none overflow-hidden">
                     <div className={`absolute top-[-20%] left-[-10%] w-[400px] h-[400px] ${isDark ? 'bg-purple-900/30' : 'bg-purple-300/30'} rounded-full blur-[120px]`} />
