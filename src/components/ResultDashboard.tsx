@@ -912,37 +912,7 @@ const CompatibilitySection = ({ birthDate, onCalculate }) => {
         return null;
     };
 
-    // Автоматический пересчёт при изменении даты партнёра
-    useEffect(() => {
-        if (!partnerDate) {
-            setResult(null);
-            setError('');
-            return;
-        }
-
-        // Проверяем, что введена полная дата (минимум 10 символов: ДД.ММ.ГГГГ)
-        if (partnerDate.length < 10) {
-            // Дата ещё вводится, не делаем ничего
-            return;
-        }
-
-        const parsed = parseDate(partnerDate);
-        if (parsed) {
-            try {
-                setError('');
-                const compatibility = calculateFullCompatibility(birthDate, parsed);
-                setResult(compatibility);
-            } catch (err) {
-                console.error('Ошибка расчёта совместимости:', err);
-                setError('Ошибка расчёта. Проверьте дату.');
-                setResult(null);
-            }
-        } else {
-            // Показываем ошибку только если дата полная, но неверная
-            setError('Введите дату в формате ДД.ММ.ГГГГ');
-            setResult(null);
-        }
-    }, [partnerDate, birthDate]);
+    // Расчёт только по кнопке
 
     const handleCalculate = (e: React.MouseEvent) => {
         e.preventDefault();
