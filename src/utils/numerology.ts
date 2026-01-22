@@ -1464,9 +1464,19 @@ const calculateLifePathCompatibility = (lp1: number | null, lp2: number | null) 
  * Детальный анализ пары по Числам Жизненного Пути
  */
 const getLifePathPairAnalysis = (n1: number, n2: number) => {
-    const min = Math.min(n1, n2);
-    const max = Math.max(n1, n2);
+    // Force reduce master numbers to base for lookup
+    const forceReduce = (n: number): number => {
+        if (n === 11) return 2;
+        if (n === 22) return 4;
+        if (n === 33) return 6;
+        return n;
+    };
+    const base1 = forceReduce(n1);
+    const base2 = forceReduce(n2);
+    const min = Math.min(base1, base2);
+    const max = Math.max(base1, base2);
     const key = `${min}-${max}`;
+
 
     const analysis: { [key: string]: { strength: string; challenge: string; tip: string } } = {
         "1-1": { strength: "Два лидера — взаимное уважение амбиций, поддержка независимости", challenge: "Конкуренция за власть, борьба эго", tip: "Разделите сферы влияния: один — дом, другой — карьера" },
