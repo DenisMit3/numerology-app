@@ -1418,6 +1418,17 @@ export const calculateFullCompatibility = (birthDate1: string, birthDate2: strin
 };
 
 /**
+ * Force reduce master numbers to base for compatibility lookups
+ */
+const forceReduceToBase = (n: number): number => {
+    if (n === 11) return 2;
+    if (n === 22) return 4;
+    if (n === 33) return 6;
+    if (n > 9) return reduceToSingle(n);
+    return n;
+};
+
+/**
  * Совместимость по Числам Жизненного Пути
  */
 const calculateLifePathCompatibility = (lp1: number | null, lp2: number | null) => {
@@ -1438,19 +1449,20 @@ const calculateLifePathCompatibility = (lp1: number | null, lp2: number | null) 
         9: { 1: 80, 2: 80, 3: 90, 4: 55, 5: 85, 6: 95, 7: 75, 8: 65, 9: 70 }
     };
 
-    const base1 = lp1 > 9 ? reduceToSingle(lp1) : lp1;
-    const base2 = lp2 > 9 ? reduceToSingle(lp2) : lp2;
+    // Always reduce to base (1-9) for matrix lookup
+    const base1 = forceReduceToBase(lp1);
+    const base2 = forceReduceToBase(lp2);
 
     let score = compatibilityMatrix[base1]?.[base2] || 70;
 
-    // Бонусы
+    // Бонусы за мастер-числа
     if (lp1 === 11 || lp2 === 11) score += 5;
     if (lp1 === 22 || lp2 === 22) score += 5;
     if (lp1 === lp2) score += 10;
 
     score = Math.min(100, score);
 
-    // Детальный анализ пары
+    // Детальный анализ пары (base1 and base2 already reduced)
     const pairAnalysis = getLifePathPairAnalysis(base1, base2);
 
     return {
@@ -1459,6 +1471,7 @@ const calculateLifePathCompatibility = (lp1: number | null, lp2: number | null) 
         description: `Числа ${lp1} и ${lp2}: ${pairAnalysis.strength}`
     };
 };
+
 
 /**
  * Детальный анализ пары по Числам Жизненного Пути
